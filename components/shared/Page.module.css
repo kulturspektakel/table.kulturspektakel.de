@@ -1,0 +1,29 @@
+.layout {
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+}
+
+.logo {
+  width: 200px;
+  padding: 15px;
+}
+
+.logo img {
+  height: 100%;
+  vertical-align: top;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.profileMenu {
+  align-self: center;
+  margin-right: 15px;
+  cursor: pointer;
+}
