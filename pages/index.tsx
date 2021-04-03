@@ -1,32 +1,22 @@
-import {useViewerQuery} from '../types/graphql';
-import React from 'react';
-import Page from '../components/shared/Page';
-import {Content} from 'antd/lib/layout/layout';
-import {Layout} from 'antd';
+import React, {useState} from 'react';
+import Slots from '../components/Slots';
 
 export default function Home() {
-  const {data, refetch, error} = useViewerQuery();
-
-  if (data?.viewer == null) {
-    if (typeof window !== 'undefined') {
-      if (error?.message === 'Not authorized') {
-        // redirect to login
-        window.location.assign('https://api.kulturspektakel.de/auth');
-      } else {
-        // fetch data client side
-        refetch();
-      }
-    }
-    return null;
-  }
-
+  const [partySize, setPartySize] = useState(1);
+  const [date, setDate] = useState('2020-01-01');
   return (
-    <Page>
-      <Layout>
-        <Content style={{margin: 24, padding: 24, background: 'white'}}>
-          Homepage
-        </Content>
-      </Layout>
-    </Page>
+    <div>
+      <input
+        type="number"
+        value={partySize}
+        onChange={(e) => setPartySize(parseInt(e.target.value, 10))}
+      />
+      <input
+        type="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+      />
+      <Slots day={date} partySize={partySize} />
+    </div>
   );
 }

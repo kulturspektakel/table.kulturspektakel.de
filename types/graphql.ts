@@ -144,105 +144,60 @@ export type Viewer = {
   profilePicture?: Maybe<Scalars['String']>;
 };
 
-export type ViewerQueryVariables = Exact<{[key: string]: never}>;
-
-export type ViewerQuery = {__typename?: 'Query'} & {
-  viewer?: Maybe<
-    {__typename?: 'Viewer'} & Pick<Viewer, 'profilePicture' | 'displayName'>
-  >;
-};
+export type SlotFragment = {__typename?: 'SlotAvailability'} & Pick<
+  SlotAvailability,
+  | 'available'
+  | 'availabilityForSmallerPartySize'
+  | 'availabilityForLargerPartySize'
+> & {
+    reservationSlot: {__typename?: 'ReservationSlot'} & Pick<
+      ReservationSlot,
+      'id' | 'startTime' | 'endTime'
+    >;
+  };
 
 export type SlotsQueryVariables = Exact<{
-  areaId: Scalars['ID'];
+  date: Scalars['Date'];
+  partySize: Scalars['Int'];
 }>;
 
 export type SlotsQuery = {__typename?: 'Query'} & {
-  area?: Maybe<
-    {__typename?: 'Area'} & {
-      friday?: Maybe<
-        Array<
-          Maybe<
-            {__typename?: 'SlotAvailability'} & {
-              reservationSlot: {__typename?: 'ReservationSlot'} & Pick<
-                ReservationSlot,
-                'id' | 'startTime' | 'endTime'
-              >;
-            }
-          >
-        >
-      >;
-    }
-  >;
-};
-
-export type TablesQueryVariables = Exact<{[key: string]: never}>;
-
-export type TablesQuery = {__typename?: 'Query'} & {
   areas?: Maybe<
-    Array<Maybe<{__typename?: 'Area'} & Pick<Area, 'id' | 'displayName'>>>
+    Array<
+      Maybe<
+        {__typename?: 'Area'} & Pick<Area, 'id' | 'displayName'> & {
+            reservableSlots?: Maybe<
+              Array<Maybe<{__typename?: 'SlotAvailability'} & SlotFragment>>
+            >;
+          }
+      >
+    >
   >;
 };
 
-export const ViewerDocument = gql`
-  query Viewer {
-    viewer {
-      profilePicture
-      displayName
+export const SlotFragmentDoc = gql`
+  fragment Slot on SlotAvailability {
+    available
+    availabilityForSmallerPartySize
+    availabilityForLargerPartySize
+    reservationSlot {
+      id
+      startTime
+      endTime
     }
   }
 `;
-
-/**
- * __useViewerQuery__
- *
- * To run a query within a React component, call `useViewerQuery` and pass it any options that fit your needs.
- * When your component renders, `useViewerQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useViewerQuery({
- *   variables: {
- *   },
- * });
- */
-export function useViewerQuery(
-  baseOptions?: Apollo.QueryHookOptions<ViewerQuery, ViewerQueryVariables>,
-) {
-  const options = {...defaultOptions, ...baseOptions};
-  return Apollo.useQuery<ViewerQuery, ViewerQueryVariables>(
-    ViewerDocument,
-    options,
-  );
-}
-export function useViewerLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<ViewerQuery, ViewerQueryVariables>,
-) {
-  const options = {...defaultOptions, ...baseOptions};
-  return Apollo.useLazyQuery<ViewerQuery, ViewerQueryVariables>(
-    ViewerDocument,
-    options,
-  );
-}
-export type ViewerQueryHookResult = ReturnType<typeof useViewerQuery>;
-export type ViewerLazyQueryHookResult = ReturnType<typeof useViewerLazyQuery>;
-export type ViewerQueryResult = Apollo.QueryResult<
-  ViewerQuery,
-  ViewerQueryVariables
->;
 export const SlotsDocument = gql`
-  query Slots($areaId: ID!) {
-    area(id: $areaId) {
-      friday: reservableSlots(partySize: 0, date: "2020-01-01") {
-        reservationSlot {
-          id
-          startTime
-          endTime
-        }
+  query Slots($date: Date!, $partySize: Int!) {
+    areas {
+      id
+      displayName
+      reservableSlots(date: $date, partySize: $partySize) {
+        ...Slot
       }
     }
   }
+  ${SlotFragmentDoc}
 `;
 
 /**
@@ -257,7 +212,8 @@ export const SlotsDocument = gql`
  * @example
  * const { data, loading, error } = useSlotsQuery({
  *   variables: {
- *      areaId: // value for 'areaId'
+ *      date: // value for 'date'
+ *      partySize: // value for 'partySize'
  *   },
  * });
  */
@@ -284,52 +240,4 @@ export type SlotsLazyQueryHookResult = ReturnType<typeof useSlotsLazyQuery>;
 export type SlotsQueryResult = Apollo.QueryResult<
   SlotsQuery,
   SlotsQueryVariables
->;
-export const TablesDocument = gql`
-  query Tables {
-    areas {
-      id
-      displayName
-    }
-  }
-`;
-
-/**
- * __useTablesQuery__
- *
- * To run a query within a React component, call `useTablesQuery` and pass it any options that fit your needs.
- * When your component renders, `useTablesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useTablesQuery({
- *   variables: {
- *   },
- * });
- */
-export function useTablesQuery(
-  baseOptions?: Apollo.QueryHookOptions<TablesQuery, TablesQueryVariables>,
-) {
-  const options = {...defaultOptions, ...baseOptions};
-  return Apollo.useQuery<TablesQuery, TablesQueryVariables>(
-    TablesDocument,
-    options,
-  );
-}
-export function useTablesLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<TablesQuery, TablesQueryVariables>,
-) {
-  const options = {...defaultOptions, ...baseOptions};
-  return Apollo.useLazyQuery<TablesQuery, TablesQueryVariables>(
-    TablesDocument,
-    options,
-  );
-}
-export type TablesQueryHookResult = ReturnType<typeof useTablesQuery>;
-export type TablesLazyQueryHookResult = ReturnType<typeof useTablesLazyQuery>;
-export type TablesQueryResult = Apollo.QueryResult<
-  TablesQuery,
-  TablesQueryVariables
 >;

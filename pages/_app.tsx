@@ -1,25 +1,12 @@
 import '../styles/globals.css';
-import 'antd/dist/antd.css';
 import React, {useMemo} from 'react';
 import NextApp, {AppContext, AppInitialProps, AppProps} from 'next/app';
-import {ViewerQuery} from '../types/graphql';
 import {
   ApolloClient,
   ApolloProvider,
-  gql,
-  HttpLink,
   InMemoryCache,
   NormalizedCacheObject,
 } from '@apollo/client';
-
-const Viewer = gql`
-  query Viewer {
-    viewer {
-      profilePicture
-      displayName
-    }
-  }
-`;
 
 type Props = {
   initialApolloState: NormalizedCacheObject;
@@ -38,13 +25,8 @@ const App = ({Component, pageProps, initialApolloState}: AppProps & Props) => {
 App.getInitialProps = async (
   app: AppContext,
 ): Promise<AppInitialProps & Props> => {
-  const apolloClient = initializeApollo(null, app.ctx.req?.headers.cookie);
+  const apolloClient = initializeApollo();
   const appProps = await NextApp.getInitialProps(app);
-
-  await apolloClient.query<ViewerQuery>({
-    query: Viewer,
-    errorPolicy: 'ignore',
-  });
 
   return {
     ...appProps,
@@ -54,16 +36,10 @@ App.getInitialProps = async (
 
 export default App;
 
-function createApolloClient(cookie?: string) {
+function createApolloClient() {
   return new ApolloClient({
     ssrMode: typeof window === 'undefined', // set to true for SSR
-    link: new HttpLink({
-      uri: 'https://api.kulturspektakel.de/graphql',
-      credentials: 'include',
-      headers: {
-        cookie,
-      },
-    }),
+    uri: 'https://api.kulturspektakel.de/graphql',
     cache: new InMemoryCache(),
   });
 }
@@ -71,9 +47,8 @@ let apolloClient: ApolloClient<NormalizedCacheObject> | null = null;
 
 function initializeApollo(
   initialState: NormalizedCacheObject | null = null,
-  cookie?: string,
 ): ApolloClient<NormalizedCacheObject> {
-  const _apolloClient = apolloClient ?? createApolloClient(cookie);
+  const _apolloClient = apolloClient ?? createApolloClient();
 
   // If your page has Next.js data fetching methods that use Apollo Client,
   // the initial state gets hydrated here
