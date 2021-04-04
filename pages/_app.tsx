@@ -7,7 +7,7 @@ import {
   InMemoryCache,
   NormalizedCacheObject,
 } from '@apollo/client';
-
+import {ChakraProvider} from '@chakra-ui/react';
 type Props = {
   initialApolloState: NormalizedCacheObject;
 };
@@ -16,9 +16,11 @@ const App = ({Component, pageProps, initialApolloState}: AppProps & Props) => {
   const client = useApollo(initialApolloState);
 
   return (
-    <ApolloProvider client={client}>
-      <Component {...pageProps} />
-    </ApolloProvider>
+    <ChakraProvider>
+      <ApolloProvider client={client}>
+        <Component {...pageProps} />
+      </ApolloProvider>
+    </ChakraProvider>
   );
 };
 

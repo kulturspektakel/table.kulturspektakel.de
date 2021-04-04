@@ -1,29 +1,21 @@
-import {SlotFragment} from '../types/graphql';
+import {SlotsQuery} from '../types/graphql';
 import React from 'react';
-import {gql} from '@apollo/client';
 import styles from './Slot.module.css';
+import {Box} from '@chakra-ui/react';
+import Link from 'next/link';
 
-gql`
-  fragment Slot on SlotAvailability {
-    available
-    availabilityForSmallerPartySize
-    availabilityForLargerPartySize
-    reservationSlot {
-      id
-      startTime
-      endTime
-    }
-  }
-`;
+export type SlotProps = SlotsQuery['areas'][number]['reservationSlot'][number];
 
-export default function Slot({data}: {data: SlotFragment}) {
+export default function Slot({data}: {data: SlotProps}) {
   return (
-    <li className={styles.slot}>
-      start: {new Date(data.reservationSlot.startTime).toLocaleTimeString()}
-      <br />
-      end: {new Date(data.reservationSlot.endTime).toLocaleTimeString()}
-      <br />
-      available: {data.available ? 'true' : 'false'}
-    </li>
+    <Link href={`/slot/${data.id}`}>
+      <Box borderRadius="lg" borderWidth="1px" className={styles.slot}>
+        start: {new Date(data.startTime).toLocaleTimeString()}
+        <br />
+        end: {new Date(data.endTime).toLocaleTimeString()}
+        <br />
+        available: {data.slotAvailability?.available ? 'true' : 'false'}
+      </Box>
+    </Link>
   );
 }
