@@ -11,9 +11,11 @@
   "dependencies": {
     "@apollo/client": "^3.3.13",
     "@apollo/react-ssr": "^4.0.0",
+    "@chakra-ui/icons": "^1.0.8",
     "@chakra-ui/react": "^1.4.2",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
+    "apollo-link-scalars": "^0.4.0",
     "date-fns": "^2.19.0",
     "framer-motion": "^4",
     "graphql": "^15.5.0",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^1.21.3",
+    "@graphql-codegen/introspection": "^1.18.1",
     "@graphql-codegen/typescript-operations": "^1.17.15",
     "@graphql-codegen/typescript-react-apollo": "^2.2.3",
     "@types/date-fns": "^2.6.0",
