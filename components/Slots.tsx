@@ -27,20 +27,19 @@ gql`
 const STEP_MINUTES = 15;
 
 export default function Slots(props: {day: Date; partySize: number}) {
-  const {data, loading} = useSlotsQuery({
+  const {data} = useSlotsQuery({
     variables: {
       partySize: props.partySize,
     },
   });
 
-  if (loading) {
+  if (!data) {
     return <Spinner />;
   }
 
-  const slots =
-    data?.areas
-      ?.flatMap((area) => area!.reservationSlot)
-      .filter((slot) => isSameDay(slot.startTime, props.day)) ?? [];
+  const slots = data.areas
+    .flatMap((area) => area!.reservationSlot)
+    .filter((slot) => isSameDay(slot.startTime, props.day));
 
   const earliestStartTime = slots.reduce(
     (acc, slot) => (acc < slot.startTime ? acc : slot.startTime),
@@ -62,8 +61,8 @@ export default function Slots(props: {day: Date; partySize: number}) {
       minutes: i * STEP_MINUTES,
     });
 
-    for (let area of data?.areas ?? []) {
-      const slot = area?.reservationSlot?.find((slot) =>
+    for (let area of data.areas) {
+      const slot = area.reservationSlot.find((slot) =>
         isEqual(slot.startTime, currentTime),
       );
 
@@ -82,7 +81,7 @@ export default function Slots(props: {day: Date; partySize: number}) {
 
       if (i === 0) {
         // start with empty slot
-        const startTime = area?.reservationSlot[0]?.startTime;
+        const startTime: Date | null = area.reservationSlot[0]?.startTime;
         cells.push(
           <Td
             rowSpan={
@@ -95,21 +94,20 @@ export default function Slots(props: {day: Date; partySize: number}) {
         continue;
       }
 
-      const previousSlotIndex =
-        area?.reservationSlot?.findIndex(({endTime}) =>
-          isEqual(endTime, currentTime),
-        ) ?? -1;
+      const previousSlotIndex = area.reservationSlot.findIndex(({endTime}) =>
+        isEqual(endTime, currentTime),
+      );
 
       if (previousSlotIndex > -1) {
         // begin of empty slot, in the middle or end
 
-        const nextStartTime =
-          area?.reservationSlot[previousSlotIndex + 1]?.startTime;
+        const nextStartTime: Date | null =
+          area.reservationSlot[previousSlotIndex + 1]?.startTime;
 
         const rowSpan = nextStartTime
           ? differenceInMinutes(
               nextStartTime,
-              area!.reservationSlot[previousSlotIndex].endTime,
+              area.reservationSlot[previousSlotIndex].endTime,
             ) / STEP_MINUTES
           : numberOfRows - i;
 
@@ -125,8 +123,10 @@ export default function Slots(props: {day: Date; partySize: number}) {
     <Table variant="unstyled">
       <Thead>
         <Tr>
-          {data?.areas?.map((area) => (
-            <Th key={area?.id}>{area?.displayName}</Th>
+          {data.areas.map((area) => (
+            <Th width={`${(1 / data.areas.length) * 100}%`} key={area.id}>
+              {area.displayName}
+            </Th>
           ))}
         </Tr>
       </Thead>

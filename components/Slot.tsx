@@ -13,6 +13,11 @@ export default function Slot({
   >['reservationSlot'][number];
   partySize: number;
 }) {
+  const {
+    available,
+    availabilityForSmallerPartySize,
+    availabilityForLargerPartySize,
+  } = data.slotAvailability;
   // if (
   //   !data.slotAvailability?.available &&
   //   !(
@@ -27,42 +32,32 @@ export default function Slot({
     <Box
       boxShadow="base"
       borderRadius="lg"
-      cursor={data.slotAvailability?.available ? 'pointer' : 'not-allowed'}
+      cursor={available ? 'pointer' : 'not-allowed'}
       padding="1"
-      backgroundColor={
-        data.slotAvailability?.available ? 'white' : 'orange.100'
-      }
+      backgroundColor={available ? 'white' : 'orange.100'}
       width="100%"
     >
-      <Badge
-        colorScheme={data.slotAvailability?.available ? undefined : 'orange'}
-      >
+      <Badge colorScheme={available ? undefined : 'orange'}>
         {data.startTime.toLocaleTimeString('de', {
           timeStyle: 'short',
         })}
         &nbsp;Uhr
       </Badge>
       <br />
-      {data.slotAvailability?.availabilityForSmallerPartySize && (
+      {availabilityForSmallerPartySize && (
         <Text>
           <WarningTwoIcon />
-          Tisch für {
-            data.slotAvailability?.availabilityForSmallerPartySize
-          }{' '}
-          Personen
+          Tisch für {availabilityForSmallerPartySize} Personen
         </Text>
       )}
-      {data.slotAvailability?.availabilityForLargerPartySize && (
+      {availabilityForLargerPartySize && (
         <Text>
           <WarningTwoIcon />
-          Tisch für {data.slotAvailability?.availabilityForLargerPartySize}{' '}
-          Personen
+          Tisch für {availabilityForLargerPartySize} Personen
         </Text>
       )}
       <br />
-      <Badge
-        colorScheme={data.slotAvailability?.available ? undefined : 'orange'}
-      >
+      <Badge colorScheme={available ? undefined : 'orange'}>
         {data.endTime.toLocaleTimeString('de', {
           timeStyle: 'short',
         })}
@@ -71,7 +66,7 @@ export default function Slot({
     </Box>
   );
 
-  if (data.slotAvailability?.available === true) {
+  if (available === true) {
     return <Link href={`/slot/${data.id}?partySize=${partySize}`}>{box}</Link>;
   }
 

@@ -89,8 +89,8 @@ export type Node = {
 
 export type Query = {
   __typename?: 'Query';
-  areas?: Maybe<Array<Maybe<Area>>>;
-  reservationsForToken?: Maybe<Array<Maybe<Reservation>>>;
+  areas: Array<Area>;
+  reservationsForToken: Array<Reservation>;
   viewer?: Maybe<Viewer>;
   node?: Maybe<Node>;
 };
@@ -124,7 +124,7 @@ export type ReservationSlot = Node & {
   startTime: Scalars['DateTime'];
   endTime: Scalars['DateTime'];
   area: Area;
-  slotAvailability?: Maybe<SlotAvailability>;
+  slotAvailability: SlotAvailability;
 };
 
 export type ReservationSlotSlotAvailabilityArgs = {
@@ -190,28 +190,22 @@ export type SlotsQueryVariables = Exact<{
 }>;
 
 export type SlotsQuery = {__typename?: 'Query'} & {
-  areas?: Maybe<
-    Array<
-      Maybe<
-        {__typename?: 'Area'} & Pick<Area, 'id' | 'displayName'> & {
-            reservationSlot: Array<
-              {__typename?: 'ReservationSlot'} & Pick<
-                ReservationSlot,
-                'id' | 'startTime' | 'endTime'
-              > & {
-                  slotAvailability?: Maybe<
-                    {__typename?: 'SlotAvailability'} & Pick<
-                      SlotAvailability,
-                      | 'available'
-                      | 'availabilityForSmallerPartySize'
-                      | 'availabilityForLargerPartySize'
-                    >
-                  >;
-                }
-            >;
-          }
-      >
-    >
+  areas: Array<
+    {__typename?: 'Area'} & Pick<Area, 'id' | 'displayName'> & {
+        reservationSlot: Array<
+          {__typename?: 'ReservationSlot'} & Pick<
+            ReservationSlot,
+            'id' | 'startTime' | 'endTime'
+          > & {
+              slotAvailability: {__typename?: 'SlotAvailability'} & Pick<
+                SlotAvailability,
+                | 'available'
+                | 'availabilityForSmallerPartySize'
+                | 'availabilityForLargerPartySize'
+              >;
+            }
+        >;
+      }
   >;
 };
 
@@ -220,19 +214,15 @@ export type ReservationQueryVariables = Exact<{
 }>;
 
 export type ReservationQuery = {__typename?: 'Query'} & {
-  reservationsForToken?: Maybe<
-    Array<
-      Maybe<
-        {__typename?: 'Reservation'} & Pick<Reservation, 'id' | 'status'> & {
-            reservationSlots: Array<
-              {__typename?: 'ReservationSlot'} & Pick<
-                ReservationSlot,
-                'id' | 'startTime' | 'endTime'
-              > & {area: {__typename?: 'Area'} & Pick<Area, 'displayName'>}
-            >;
-          }
-      >
-    >
+  reservationsForToken: Array<
+    {__typename?: 'Reservation'} & Pick<Reservation, 'id' | 'status'> & {
+        reservationSlots: Array<
+          {__typename?: 'ReservationSlot'} & Pick<
+            ReservationSlot,
+            'id' | 'startTime' | 'endTime'
+          > & {area: {__typename?: 'Area'} & Pick<Area, 'displayName'>}
+        >;
+      }
   >;
 };
 

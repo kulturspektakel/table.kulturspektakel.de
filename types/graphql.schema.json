@@ -557,9 +557,17 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
-              "ofType": {"kind": "OBJECT", "name": "Area", "ofType": null}
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {"kind": "OBJECT", "name": "Area", "ofType": null}
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -582,12 +590,20 @@
               }
             ],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
-                "name": "Reservation",
-                "ofType": null
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Reservation",
+                    "ofType": null
+                  }
+                }
               }
             },
             "isDeprecated": false,
@@ -803,9 +819,13 @@
               }
             ],
             "type": {
-              "kind": "OBJECT",
-              "name": "SlotAvailability",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SlotAvailability",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
