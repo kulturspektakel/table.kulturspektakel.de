@@ -50,6 +50,15 @@ export type AreaReservationSlotOrderByInput = {
   startTime?: Maybe<SortOrder>;
 };
 
+export type Band = {
+  __typename?: 'Band';
+  id: Scalars['Int'];
+  name: Scalars['String'];
+  genre?: Maybe<Scalars['String']>;
+  startTime: Scalars['DateTime'];
+  endTime: Scalars['DateTime'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   cancelReservation?: Maybe<Scalars['Boolean']>;
@@ -125,6 +134,7 @@ export type ReservationSlot = Node & {
   endTime: Scalars['DateTime'];
   area: Area;
   slotAvailability: SlotAvailability;
+  bandsPlaying: Array<Band>;
 };
 
 export type ReservationSlotSlotAvailabilityArgs = {
@@ -203,6 +213,12 @@ export type SlotsQuery = {__typename?: 'Query'} & {
                 | 'availabilityForSmallerPartySize'
                 | 'availabilityForLargerPartySize'
               >;
+              bandsPlaying: Array<
+                {__typename?: 'Band'} & Pick<
+                  Band,
+                  'id' | 'name' | 'genre' | 'startTime'
+                >
+              >;
             }
         >;
       }
@@ -266,6 +282,12 @@ export const SlotsDocument = gql`
           available
           availabilityForSmallerPartySize
           availabilityForLargerPartySize
+        }
+        bandsPlaying {
+          id
+          name
+          genre
+          startTime
         }
       }
     }

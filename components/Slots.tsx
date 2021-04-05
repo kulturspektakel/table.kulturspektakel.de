@@ -2,7 +2,16 @@ import {useSlotsQuery} from '../types/graphql';
 import React from 'react';
 import {gql} from '@apollo/client';
 import Slot from './Slot';
-import {Spinner, Table, Thead, Th, Tr, Tbody, Td} from '@chakra-ui/react';
+import {
+  Spinner,
+  Table,
+  Thead,
+  Th,
+  Tr,
+  Tbody,
+  Td,
+  Center,
+} from '@chakra-ui/react';
 import {add, differenceInMinutes, isEqual, isSameDay} from 'date-fns';
 
 gql`
@@ -19,6 +28,12 @@ gql`
           availabilityForSmallerPartySize
           availabilityForLargerPartySize
         }
+        bandsPlaying {
+          id
+          name
+          genre
+          startTime
+        }
       }
     }
   }
@@ -34,7 +49,11 @@ export default function Slots(props: {day: Date; partySize: number}) {
   });
 
   if (!data) {
-    return <Spinner />;
+    return (
+      <Center h="200px">
+        <Spinner />
+      </Center>
+    );
   }
 
   const slots = data.areas
@@ -69,6 +88,7 @@ export default function Slots(props: {day: Date; partySize: number}) {
       if (slot) {
         cells.push(
           <Td
+            key={area.id}
             rowSpan={
               differenceInMinutes(slot.endTime, slot.startTime) / STEP_MINUTES
             }
@@ -84,6 +104,7 @@ export default function Slots(props: {day: Date; partySize: number}) {
         const startTime: Date | null = area.reservationSlot[0]?.startTime;
         cells.push(
           <Td
+            key={area.id}
             rowSpan={
               startTime
                 ? differenceInMinutes(startTime, currentTime) / STEP_MINUTES
@@ -112,15 +133,26 @@ export default function Slots(props: {day: Date; partySize: number}) {
           : numberOfRows - i;
 
         if (rowSpan > 0) {
-          cells.push(<Td rowSpan={rowSpan} />);
+          cells.push(<Td key={area.id} rowSpan={rowSpan} />);
         }
       }
     }
-    rows.push(<Tr>{cells}</Tr>);
+    rows.push(
+      <Tr
+        key={i}
+        boxShadow={
+          (STEP_MINUTES * i) % 60 == 0
+            ? `0 -1px 0 var(--chakra-colors-gray-200)`
+            : undefined
+        }
+      >
+        {cells}
+      </Tr>,
+    );
   }
 
   return (
-    <Table variant="unstyled">
+    <Table variant="unstyled" height="1px" size="sm">
       <Thead>
         <Tr>
           {data.areas.map((area) => (
