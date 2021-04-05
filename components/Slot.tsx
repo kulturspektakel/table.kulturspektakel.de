@@ -1,8 +1,7 @@
 import {SlotsQuery} from '../types/graphql';
 import React from 'react';
-import {Badge, Box, Flex, HStack, Spacer, Text} from '@chakra-ui/react';
+import {Badge, Box, Flex, Text} from '@chakra-ui/react';
 import Link from 'next/link';
-import {WarningTwoIcon} from '@chakra-ui/icons';
 
 export default function Slot({
   data,
