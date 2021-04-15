@@ -1,50 +1,47 @@
-import {useSlotsQuery} from '../types/graphql';
+import {SlotsQuery, useSlotsQuery} from '../types/graphql';
 import React from 'react';
 import {gql} from '@apollo/client';
-import Slot from './Slot';
+import {Spinner, Center, Box, VStack, Heading, Flex} from '@chakra-ui/react';
 import {
-  Spinner,
-  Table,
-  Thead,
-  Th,
-  Tr,
-  Tbody,
-  Td,
-  Center,
-} from '@chakra-ui/react';
-import {add, differenceInMinutes, isEqual, isSameDay} from 'date-fns';
+  add,
+  isEqual,
+  isBefore,
+  isAfter,
+  max,
+  isWithinInterval,
+  differenceInMinutes,
+} from 'date-fns';
+import {SlotContent, SlotLink, SlotPopover} from './Slot';
 
 gql`
-  query Slots($partySize: Int!) {
+  query Slots($partySize: Int!, $day: Date!) {
     areas {
       id
       displayName
-      reservationSlot(orderBy: {startTime: asc}) {
-        id
+      openingHour(day: $day) {
         startTime
         endTime
-        slotAvailability(partySize: $partySize) {
-          available
-          availabilityForSmallerPartySize
-          availabilityForLargerPartySize
-        }
-        bandsPlaying {
-          id
-          name
-          genre
-          startTime
-        }
+      }
+      availability(day: $day, partySize: $partySize) {
+        startTime
+        endTime
+      }
+      bandsPlaying(day: $day) {
+        ...BandPopover
+        startTime
+        endTime
       }
     }
   }
 `;
 
-const STEP_MINUTES = 15;
+export const STEP_MINUTES = 30;
 
 export default function Slots(props: {day: Date; partySize: number}) {
   const {data} = useSlotsQuery({
     variables: {
       partySize: props.partySize,
+      day: props.day,
     },
   });
 
@@ -56,113 +53,94 @@ export default function Slots(props: {day: Date; partySize: number}) {
     );
   }
 
-  const slots = data.areas
-    .flatMap((area) => area!.reservationSlot)
-    .filter((slot) => isSameDay(slot.startTime, props.day));
-
-  const earliestStartTime = slots.reduce(
-    (acc, slot) => (acc < slot.startTime ? acc : slot.startTime),
-    new Date(Infinity),
+  const from = new Date(
+    Math.min(
+      ...data.areas.flatMap(({openingHour}) =>
+        openingHour.map(({startTime}) => startTime.getTime()),
+      ),
+    ),
   );
 
-  const latestEndTime = slots.reduce(
-    (acc, slot) => (acc > slot.endTime ? acc : slot.endTime),
-    new Date(0),
+  const until = new Date(
+    Math.max(
+      ...data.areas.flatMap(({openingHour}) =>
+        openingHour.map(({endTime}) => endTime.getTime()),
+      ),
+    ),
   );
 
-  const rows = [];
-  const numberOfRows =
-    differenceInMinutes(latestEndTime, earliestStartTime) / STEP_MINUTES;
-  for (let i = 0; i < numberOfRows; i++) {
-    const cells = [];
-
-    const currentTime = add(earliestStartTime, {
-      minutes: i * STEP_MINUTES,
-    });
-
-    for (let area of data.areas) {
-      const slot = area.reservationSlot.find((slot) =>
-        isEqual(slot.startTime, currentTime),
-      );
-
-      if (slot) {
-        cells.push(
-          <Td
-            key={area.id}
-            rowSpan={
-              differenceInMinutes(slot.endTime, slot.startTime) / STEP_MINUTES
-            }
-          >
-            <Slot data={slot} key={slot.id} partySize={props.partySize} />
-          </Td>,
-        );
-        continue;
-      }
-
-      if (i === 0) {
-        // start with empty slot
-        const startTime: Date | null = area.reservationSlot[0]?.startTime;
-        cells.push(
-          <Td
-            key={area.id}
-            rowSpan={
-              startTime
-                ? differenceInMinutes(startTime, currentTime) / STEP_MINUTES
-                : numberOfRows
-            }
-          />,
-        );
-        continue;
-      }
-
-      const previousSlotIndex = area.reservationSlot.findIndex(({endTime}) =>
-        isEqual(endTime, currentTime),
-      );
-
-      if (previousSlotIndex > -1) {
-        // begin of empty slot, in the middle or end
-
-        const nextStartTime: Date | null =
-          area.reservationSlot[previousSlotIndex + 1]?.startTime;
-
-        const rowSpan = nextStartTime
-          ? differenceInMinutes(
-              nextStartTime,
-              area.reservationSlot[previousSlotIndex].endTime,
-            ) / STEP_MINUTES
-          : numberOfRows - i;
-
-        if (rowSpan > 0) {
-          cells.push(<Td key={area.id} rowSpan={rowSpan} />);
-        }
-      }
-    }
-    rows.push(
-      <Tr
-        key={i}
-        boxShadow={
-          (STEP_MINUTES * i) % 60 == 0
-            ? `0 -1px 0 var(--chakra-colors-gray-200)`
-            : undefined
-        }
-      >
-        {cells}
-      </Tr>,
-    );
-  }
+  const w = `${100 / data.areas.length}%`;
 
   return (
-    <Table variant="unstyled" height="1px" size="sm">
-      <Thead>
-        <Tr>
-          {data.areas.map((area) => (
-            <Th width={`${(1 / data.areas.length) * 100}%`} key={area.id}>
-              {area.displayName}
-            </Th>
-          ))}
-        </Tr>
-      </Thead>
-      <Tbody>{rows}</Tbody>
-    </Table>
+    <Flex w="100%">
+      {data.areas.map((area) => (
+        <Box h="10" minW={w} maxW={w} key={area.id}>
+          <Heading size="sm" mb={4} textAlign="center" noOfLines={2} h="12">
+            {area.displayName}
+          </Heading>
+          <AreaSlots
+            area={area}
+            from={from}
+            until={until}
+            partySize={props.partySize}
+          />
+        </Box>
+      ))}
+    </Flex>
   );
 }
+
+function AreaSlots(props: {
+  area: SlotsQuery['areas'][number];
+  from: Date;
+  until: Date;
+  partySize: number;
+}) {
+  const steps = differenceInMinutes(props.until, props.from) / STEP_MINUTES;
+  return (
+    <VStack p="1">
+      {Array.from(Array(steps)).map((_, i) => {
+        const time = add(props.from, {minutes: STEP_MINUTES * i});
+        const open = isOpen(props.area.openingHour, time);
+        const mx = maxAvailability(props.area.availability, time);
+        const available =
+          (open && mx && differenceInMinutes(mx, time) >= 90) ?? false;
+
+        const band = props.area.bandsPlaying.find((i) => isWithin(i, time));
+        return (
+          <SlotLink
+            startTime={time}
+            area={props.area}
+            endTime={mx}
+            partySize={props.partySize}
+            key={time.toString()}
+          >
+            <SlotPopover band={available ? band : undefined}>
+              <SlotContent time={time} available={available} open={open} />
+            </SlotPopover>
+          </SlotLink>
+        );
+      })}
+    </VStack>
+  );
+}
+
+type Interval = {startTime: Date; endTime: Date};
+
+const maxAvailability = (intervals: Interval[], time: Date) =>
+  intervals.reduce<Date | null>((acc, {startTime: start, endTime: end}) => {
+    if (
+      isWithinInterval(time, {start, end}) &&
+      isWithinInterval(add(time, {minutes: 90}), {start, end})
+    ) {
+      acc = max([acc ?? new Date(0), end]);
+    }
+    return acc;
+  }, null);
+
+const isOpen = (intervals: Interval[], time: Date) =>
+  intervals.some((interval) => isWithin(interval, time));
+
+const isWithin = ({startTime, endTime}: Interval, time: Date) =>
+  (isEqual(time, startTime) || isAfter(time, startTime)) &&
+  isBefore(time, endTime);

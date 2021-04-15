@@ -2,47 +2,30 @@ import React from 'react';
 import {useRouter} from 'next/dist/client/router';
 import {Button, FormControl, FormLabel, Input, Stack} from '@chakra-ui/react';
 import {gql} from '@apollo/client';
-import {useRequestReservationMutation, useSlotQuery} from '../../types/graphql';
+import {useRequestReservationMutation} from '../../types/graphql';
 
 gql`
-  query Slot($id: ID!) {
-    node(id: $id) {
-      ... on ReservationSlot {
-        startTime
-        endTime
-        area {
-          displayName
-        }
-      }
-    }
-  }
-
   mutation RequestReservation(
     $primaryPerson: String!
     $primaryEmail: String!
     $otherPersons: [String!]!
-    $slotIds: [ID!]!
+    $startTime: DateTime!
+    $endTime: DateTime!
+    $areaId: ID!
   ) {
     requestReservation(
       primaryPerson: $primaryPerson
       primaryEmail: $primaryEmail
       otherPersons: $otherPersons
-      otherEmails: []
-      slotIds: $slotIds
-    ) {
-      id
-      status
-    }
+      startTime: $startTime
+      endTime: $endTime
+      areaId: $areaId
+    )
   }
 `;
 
 export default function ReserveSlot() {
   const {query} = useRouter();
-  const {data, loading} = useSlotQuery({
-    variables: {
-      id: `ReservationSlot:${query.id}`,
-    },
-  });
 
   const [
     requestReservation,

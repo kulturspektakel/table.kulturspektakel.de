@@ -3,6 +3,8 @@ import React, {useState} from 'react';
 import Slots from '../components/Slots';
 import {formatISO, isSameDay, parseISO} from 'date-fns';
 import Page from '../components/Page';
+import {useRouter} from 'next/dist/client/router';
+import Link from 'next/link';
 
 const DATES = [
   new Date('2021-07-23'),
@@ -13,23 +15,24 @@ const DATES = [
 export default function Home() {
   const [partySize, setPartySize] = useState(4);
   const defaultDate = DATES.find((d) => isSameDay(d, new Date())) ?? DATES[0];
-  const [date, setDate] = useState(defaultDate);
+  const [startTime, setStartTime] = useState(defaultDate);
+  const router = useRouter();
 
   return (
     <Page>
       <VStack spacing="10">
         <HStack spacing="10">
           <Select
-            fontWeight="bold"
+            fontWeight="semibold"
             backgroundColor="white"
-            value={formatISO(date, {
+            value={formatISO(startTime, {
               representation: 'date',
             })}
-            onChange={(e) => setDate(parseISO(e.target.value))}
-            minW="250px"
+            onChange={(e) => setStartTime(parseISO(e.target.value))}
+            minW="64"
           >
-            {DATES.map((d) => (
-              <option value={formatISO(d, {representation: 'date'})}>
+            {DATES.map((d, i) => (
+              <option key={i} value={formatISO(d, {representation: 'date'})}>
                 {d.toLocaleDateString('de', {
                   weekday: 'long',
                   day: '2-digit',
@@ -40,9 +43,10 @@ export default function Home() {
             ))}
           </Select>
           <Select
-            fontWeight="bold"
+            fontWeight="semibold"
             backgroundColor="white"
             value={partySize}
+            minW="48"
             onChange={(e) => setPartySize(parseInt(e.target.value, 10))}
           >
             {Array.from(Array(9)).map((_, i) => (
@@ -52,8 +56,7 @@ export default function Home() {
             ))}
           </Select>
         </HStack>
-
-        <Slots day={date} partySize={partySize} />
+        <Slots day={startTime} partySize={partySize} />
       </VStack>
     </Page>
   );

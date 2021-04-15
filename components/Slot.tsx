@@ -1,100 +1,134 @@
-import {SlotsQuery} from '../types/graphql';
+import {BandPopoverFragment} from '../types/graphql';
 import React from 'react';
-import {Badge, Box, Flex, Text} from '@chakra-ui/react';
+import {
+  Center,
+  Text,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  PopoverBody,
+  PopoverArrow,
+  Box,
+} from '@chakra-ui/react';
 import Link from 'next/link';
+import {gql} from '@apollo/client';
+import {Props} from '../pages/book';
 
-export default function Slot({
-  data,
+export function SlotLink({
+  startTime,
+  endTime,
   partySize,
+  area,
+  children,
 }: {
-  data: NonNullable<
-    NonNullable<SlotsQuery['areas']>[number]
-  >['reservationSlot'][number];
+  startTime: Date;
+  endTime: Date | null;
+  area: {
+    id: string;
+    displayName: string;
+  };
   partySize: number;
+  children: any;
 }) {
-  const {
-    available,
-    availabilityForSmallerPartySize,
-    availabilityForLargerPartySize,
-  } = data.slotAvailability;
-
-  let content = null;
-  if (availabilityForSmallerPartySize) {
-    content = (
-      <Badge colorScheme="yellow" variant="outline">
-        max. {availabilityForSmallerPartySize} Personen
-      </Badge>
-    );
-  } else if (availabilityForLargerPartySize) {
-    content = (
-      <Badge colorScheme="yellow" variant="outline">
-        mind. {availabilityForSmallerPartySize} Personen
-      </Badge>
-    );
-  } else if (!available) {
-    content = (
-      <Badge colorScheme="red" variant="outline">
-        belegt
-      </Badge>
-    );
-  } else {
-    content = (
-      <>
-        <Badge colorScheme="green">frei</Badge>
-        {data.bandsPlaying.length > 0 && (
-          <>
-            <Text fontWeight="500" pt="1">
-              Bands:
-            </Text>
-            {data.bandsPlaying.map((band) => (
-              <Text key={band.id}>
-                {band.name} ({band.genre})
-              </Text>
-            ))}
-          </>
-        )}
-      </>
-    );
+  if (!endTime) {
+    return children;
   }
 
-  const box = (
-    <Box
-      boxShadow={available ? 'base' : 'none'}
-      backgroundColor={available ? 'white' : 'gray.50'}
-      cursor={available ? 'pointer' : 'not-allowed'}
-      borderColor={available ? 'transparent' : 'gray.300'}
-      transition=".2s ease-out box-shadow"
+  const query: Props = {
+    startTime: startTime.getTime(),
+    endTime: endTime.getTime(),
+    partySize,
+    areaId: area.id,
+    area: area.displayName,
+  };
+  return (
+    <Link
+      href={{
+        pathname: '/book',
+        query,
+      }}
+    >
+      <Box w="100%">{children}</Box>
+    </Link>
+  );
+}
+
+gql`
+  fragment BandPopover on Band {
+    name
+    genre
+  }
+`;
+
+export function SlotPopover({
+  children,
+  band,
+}: {
+  children: any;
+  band?: BandPopoverFragment;
+}) {
+  if (!band) {
+    return children;
+  }
+
+  return (
+    <Popover trigger="hover" placement="left" isLazy>
+      <PopoverTrigger>
+        <Box w="100%">{children}</Box>
+      </PopoverTrigger>
+      <PopoverContent
+        bg="gray.900"
+        color="white"
+        borderColor="gray.900"
+        fontSize="sm"
+      >
+        <PopoverArrow bg="gray.900" />
+        <PopoverBody>
+          <Text>
+            <strong>{band.name}</strong> ({band.genre})
+          </Text>
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore.
+        </PopoverBody>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+export function SlotContent({
+  time,
+  available,
+  open,
+}: {
+  time: Date;
+  available: boolean;
+  open: boolean;
+}) {
+  return (
+    <Center
+      h="40px"
+      w="100%"
+      key={time.toString()}
+      borderColor="gray.200"
+      backgroundColor={available ? 'white' : undefined}
       borderRadius="lg"
-      borderWidth="1px"
-      p="2"
-      h="100%"
+      flexDirection="column"
+      boxShadow={available ? 'sm' : undefined}
+      borderWidth={open && !available ? 1 : 0}
+      cursor={available ? 'pointer' : open ? 'not-allowed' : 'default'}
+      transition=".2s ease-out box-shadow"
+      lineHeight="1"
       _hover={{
         boxShadow: available ? 'md' : 'none',
       }}
     >
-      <Flex direction="column" minH="10" h="100%">
-        <Text textColor="gray.600">
-          {data.startTime.toLocaleTimeString('de', {
-            timeStyle: 'short',
+      <Text>
+        {available &&
+          time.toLocaleTimeString('de', {
+            hour: '2-digit',
+            minute: '2-digit',
           })}
-          &nbsp;Uhr
-        </Text>
-        <Box flexGrow={1} pt="3" pb="3">
-          {content}
-        </Box>
-        <Text textColor="gray.600">
-          {data.endTime.toLocaleTimeString('de', {
-            timeStyle: 'short',
-          })}
-          &nbsp;Uhr
-        </Text>
-      </Flex>
-    </Box>
+      </Text>
+    </Center>
   );
-
-  if (available === true) {
-    return <Link href={`/slot/${data.id}?partySize=${partySize}`}>{box}</Link>;
-  }
-
-  return box;
 }

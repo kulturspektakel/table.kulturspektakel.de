@@ -7,22 +7,27 @@ import {withScalars} from 'apollo-link-scalars';
 import {ApolloLink, HttpLink} from '@apollo/client/core';
 import introspectionResult from '../types/graphql.schema.json';
 import {buildClientSchema, IntrospectionQuery} from 'graphql';
+import {formatISO} from 'date-fns';
 
 function createApolloClient() {
-  const DateTime = {
-    serialize: (parsed: Date) => parsed.toString(),
-    parseValue: (raw: string | number | null): Date | null => {
-      return raw ? new Date(raw) : null;
-    },
-  };
-
   const scalarLink: ApolloLink = withScalars({
     schema: buildClientSchema(
       (introspectionResult as unknown) as IntrospectionQuery,
     ),
     typesMap: {
-      DateTime,
-      Date: DateTime,
+      DateTime: {
+        serialize: (parsed: Date) => formatISO(parsed),
+        parseValue: (raw: string | number | null): Date | null => {
+          return raw ? new Date(raw) : null;
+        },
+      },
+      Date: {
+        serialize: (parsed: Date) =>
+          formatISO(parsed, {representation: 'date'}),
+        parseValue: (raw: string | number | null): Date | null => {
+          return raw ? new Date(raw) : null;
+        },
+      },
     },
   }) as any;
 

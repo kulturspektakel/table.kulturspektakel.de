@@ -1,23 +1,18 @@
 import React from 'react';
 import {useRouter} from 'next/dist/client/router';
-import {Center, Spinner, VStack} from '@chakra-ui/react';
+import {Button, Center, Spinner, VStack} from '@chakra-ui/react';
 import {gql} from '@apollo/client';
 import {useReservationQuery} from '../../types/graphql';
 import Page from '../../components/Page';
 import Reservation from '../../components/Reservation';
+import Link from 'next/link';
 
 gql`
   query Reservation($token: String!) {
-    reservationsForToken(token: $token) {
-      id
-      status
-      reservationSlots {
-        id
-        startTime
-        endTime
-        area {
-          displayName
-        }
+    reservationForToken(token: $token) {
+      ...ReservationFragment
+      reservationsFromSamePerson {
+        ...ReservationFragment
       }
     }
   }
@@ -31,9 +26,16 @@ export default function Reservations() {
     <Page>
       {data ? (
         <VStack spacing="3" alignItems="stretch">
-          {data.reservationsForToken.map((reservation) => (
-            <Reservation key={reservation.id} data={reservation} />
-          ))}
+          <Link href="/">
+            <Button colorScheme="green" alignSelf="flex-end">
+              Neue Reservierung
+            </Button>
+          </Link>
+          {data.reservationForToken?.reservationsFromSamePerson.map(
+            (reservation) => (
+              <Reservation key={reservation.id} data={reservation} />
+            ),
+          )}
         </VStack>
       ) : (
         <Center>

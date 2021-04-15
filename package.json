@@ -16,7 +16,7 @@
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "apollo-link-scalars": "^0.4.0",
-    "date-fns": "^2.19.0",
+    "date-fns": "^2.20.2",
     "framer-motion": "^4",
     "graphql": "^15.5.0",
     "next": "10.0.5",
