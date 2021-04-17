@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@apollo/client": "^3.3.13",
-    "@apollo/react-ssr": "^4.0.0",
     "@chakra-ui/icons": "^1.0.8",
     "@chakra-ui/react": "^1.4.2",
     "@emotion/react": "^11",

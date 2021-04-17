@@ -74,6 +74,7 @@ export type Mutation = {
   confirmReservation?: Maybe<Reservation>;
   requestReservation: Scalars['Boolean'];
   updateReservation?: Maybe<Reservation>;
+  createOrder?: Maybe<Order>;
 };
 
 export type MutationCancelReservationArgs = {
@@ -100,10 +101,39 @@ export type MutationUpdateReservationArgs = {
   otherPersons: Array<Scalars['String']>;
 };
 
+export type MutationCreateOrderArgs = {
+  tableId: Scalars['ID'];
+  products: Array<OrderItem>;
+  payment: OrderPayment;
+};
+
 export type Node = {
   /** Unique identifier for the resource */
   id: Scalars['ID'];
 };
+
+export type Order = {
+  __typename?: 'Order';
+  id: Scalars['Int'];
+  payment: OrderPayment;
+  tokens: Scalars['Int'];
+  total?: Maybe<Scalars['Int']>;
+};
+
+export type OrderItem = {
+  productId: Scalars['Int'];
+  amount: Scalars['Int'];
+  note?: Maybe<Scalars['String']>;
+};
+
+export enum OrderPayment {
+  Cash = 'CASH',
+  Bon = 'BON',
+  SumUp = 'SUM_UP',
+  Voucher = 'VOUCHER',
+  FreeCrew = 'FREE_CREW',
+  FreeBand = 'FREE_BAND',
+}
 
 export type Product = {
   __typename?: 'Product';

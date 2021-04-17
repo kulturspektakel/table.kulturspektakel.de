@@ -4,7 +4,6 @@ import Slots from '../components/Slots';
 import {formatISO, isSameDay, parseISO} from 'date-fns';
 import Page from '../components/Page';
 import {useRouter} from 'next/dist/client/router';
-import Link from 'next/link';
 
 const DATES = [
   new Date('2021-07-23'),
@@ -16,7 +15,6 @@ export default function Home() {
   const [partySize, setPartySize] = useState(4);
   const defaultDate = DATES.find((d) => isSameDay(d, new Date())) ?? DATES[0];
   const [startTime, setStartTime] = useState(defaultDate);
-  const router = useRouter();
 
   return (
     <Page>

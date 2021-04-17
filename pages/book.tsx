@@ -1,8 +1,19 @@
 import {gql} from '@apollo/client';
-import {Select, Table, Td, Th, Tr, Button, Tbody} from '@chakra-ui/react';
+import {
+  Select,
+  Table,
+  Td,
+  Th,
+  Tr,
+  Button,
+  Tbody,
+  Box,
+  Input,
+} from '@chakra-ui/react';
 import {differenceInMinutes, add, formatISO, parseISO} from 'date-fns';
 import {GetServerSideProps} from 'next';
-import React, {useState} from 'react';
+import {useRouter} from 'next/router';
+import React, {useEffect, useState} from 'react';
 import Page from '../components/Page';
 import {STEP_MINUTES} from '../components/Slots';
 import useErrorDialog from '../components/useErrorDialog';
@@ -48,92 +59,153 @@ export default function Booking({
 }: Props) {
   const startTime = new Date(s);
   const maxEndTime = new Date(e);
-  const [endTime, setEndTime] = useState(maxEndTime);
-  const [requestReservation, {loading, error}] = useRequestMutation({
+  const earliestEnd = add(startTime, {minutes: MIN_DURATION_MINUTES});
+  const [endTime, setEndTime] = useState(earliestEnd);
+  const [primaryPerson, setPrimaryPerson] = useState('');
+  const [primaryEmail, setPrimaryEmail] = useState('');
+  const [otherPersons, setOtherPersons] = useState<string[]>(
+    Array.from(Array(partySize - 1)).map((_) => ''),
+  );
+  const [requestReservation, {loading, error, data}] = useRequestMutation({
     variables: {
       areaId,
       endTime,
-      otherPersons: [],
-      primaryEmail: '',
-      primaryPerson: '',
+      otherPersons,
+      primaryEmail,
+      primaryPerson,
       startTime,
     },
     errorPolicy: 'all',
   });
   const errorDialog = useErrorDialog(error);
+  const router = useRouter();
+  useEffect(() => {
+    if (data?.requestReservation) {
+      router.push('/confirm');
+    }
+  }, [data, router]);
 
-  const earliestEnd = add(startTime, {minutes: MIN_DURATION_MINUTES});
-  const steps = Math.floor(
-    Math.min(
-      MAX_DURATION_MINUTES - MIN_DURATION_MINUTES,
-      differenceInMinutes(maxEndTime, earliestEnd),
-    ) / STEP_MINUTES,
-  );
+  const steps =
+    Math.floor(
+      Math.min(
+        MAX_DURATION_MINUTES - MIN_DURATION_MINUTES,
+        differenceInMinutes(maxEndTime, earliestEnd),
+      ) / STEP_MINUTES,
+    ) + 1;
 
   return (
     <Page>
       {errorDialog}
-      <Table>
-        <Tbody>
-          <Tr>
-            <Th isNumeric>Tag</Th>
-            <Td fontWeight="semibold">
-              {startTime.toLocaleDateString('de', {
-                weekday: 'long',
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-              })}
-            </Td>
-          </Tr>
-          <Tr>
-            <Th isNumeric>Bereich</Th>
-            <Td fontWeight="semibold">{area}</Td>
-          </Tr>
-          <Tr>
-            <Th isNumeric>Gäste</Th>
-            <Td fontWeight="semibold">{partySize} Personen</Td>
-          </Tr>
-          <Tr>
-            <Th isNumeric>von</Th>
-            <Td fontWeight="semibold">{renderTime(startTime)}</Td>
-          </Tr>
-          <Tr>
-            <Th isNumeric>bis</Th>
-            <Td fontWeight="semibold">
-              {steps < 2 ? (
-                renderTime(maxEndTime)
-              ) : (
-                <Select
-                  fontWeight="semibold"
-                  backgroundColor="white"
-                  value={formatISO(endTime)}
-                  onChange={(e) => setEndTime(parseISO(e.target.value))}
-                >
-                  {Array.from(Array(steps)).map((_, i) => {
-                    const date = add(earliestEnd, {
-                      minutes: i * STEP_MINUTES,
-                    });
-                    return (
-                      <option key={i} value={formatISO(date)}>
-                        {renderTime(date)}
-                      </option>
-                    );
-                  })}
-                </Select>
-              )}
-            </Td>
-          </Tr>
-        </Tbody>
-      </Table>
-      <Button
-        colorScheme="blue"
-        isFullWidth
-        isLoading={loading}
-        onClick={() => requestReservation({})}
-      >
-        Reservieren
-      </Button>
+      <Box boxShadow="sm" bg="white" borderRadius="md">
+        <Table size="md">
+          <Tbody>
+            <Tr>
+              <Th pr="0" isNumeric>
+                Tag
+              </Th>
+              <Td fontWeight="semibold">
+                {startTime.toLocaleDateString('de', {
+                  weekday: 'long',
+                  day: '2-digit',
+                  month: 'long',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                })}{' '}
+                Uhr
+              </Td>
+            </Tr>
+            <Tr>
+              <Th pr="0" isNumeric>
+                bis
+              </Th>
+              <Td fontWeight="semibold">
+                {steps < 2 ? (
+                  renderTime(maxEndTime)
+                ) : (
+                  <Select
+                    fontWeight="semibold"
+                    backgroundColor="white"
+                    value={formatISO(endTime)}
+                    onChange={(e) => setEndTime(parseISO(e.target.value))}
+                  >
+                    {Array.from(Array(steps)).map((_, i) => {
+                      const date = add(earliestEnd, {
+                        minutes: i * STEP_MINUTES,
+                      });
+                      return (
+                        <option key={i} value={formatISO(date)}>
+                          {renderTime(date)}
+                        </option>
+                      );
+                    })}
+                  </Select>
+                )}
+              </Td>
+            </Tr>
+            <Tr>
+              <Th minH="64px" pr="0" isNumeric>
+                Bereich
+              </Th>
+              <Td fontWeight="semibold">{area}</Td>
+            </Tr>
+            <Tr>
+              <Th pr="0" isNumeric>
+                Name
+              </Th>
+              <Td fontWeight="semibold">
+                <Input
+                  placeholder="Deine Name"
+                  onChange={(e) => setPrimaryPerson(e.target.value)}
+                />
+              </Td>
+            </Tr>
+            <Tr>
+              <Th pr="0" isNumeric>
+                E-Mail
+              </Th>
+              <Td fontWeight="semibold">
+                <Input
+                  placeholder="Deine E-Mail-Adresse"
+                  type="email"
+                  onChange={(e) => setPrimaryEmail(e.target.value)}
+                />
+              </Td>
+            </Tr>
+            <Tr>
+              <Th pr="0" pt="6" verticalAlign="top" isNumeric>
+                Gäste
+              </Th>
+              <Td fontWeight="semibold">
+                {Array.from(Array(partySize - 1)).map((_, i) => (
+                  <Input
+                    key={i}
+                    placeholder="Name"
+                    mt={i > 0 ? 2 : 0}
+                    onChange={(e) => {
+                      const newPersons = [...otherPersons];
+                      newPersons[i] = e.target.value;
+                      setOtherPersons(newPersons);
+                    }}
+                  />
+                ))}
+              </Td>
+            </Tr>
+          </Tbody>
+        </Table>
+        <Box p="5">
+          <Button
+            colorScheme="blue"
+            isFullWidth
+            isLoading={loading}
+            isDisabled={
+              !primaryPerson || !primaryEmail || otherPersons.some((p) => !p)
+            }
+            onClick={() => requestReservation()}
+          >
+            Reservieren
+          </Button>
+        </Box>
+      </Box>
     </Page>
   );
 }
