@@ -47,11 +47,13 @@ export default function Reservation({
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: 'Europe/Berlin',
       })}{' '}
       bis{' '}
       {data.endTime.toLocaleTimeString('de', {
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: 'Europe/Berlin',
       })}{' '}
       Uhr
       <br />

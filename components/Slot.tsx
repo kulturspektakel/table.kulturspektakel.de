@@ -127,6 +127,7 @@ export function SlotContent({
           time.toLocaleTimeString('de', {
             hour: '2-digit',
             minute: '2-digit',
+            timeZone: 'Europe/Berlin',
           })}
       </Text>
     </Center>

@@ -36,6 +36,7 @@ export default function Home() {
                   day: '2-digit',
                   month: 'long',
                   year: 'numeric',
+                  timeZone: 'Europe/Berlin',
                 })}
               </option>
             ))}

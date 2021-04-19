@@ -9,6 +9,7 @@ import {
   Tbody,
   Box,
   Input,
+  VStack,
 } from '@chakra-ui/react';
 import {differenceInMinutes, add, formatISO, parseISO} from 'date-fns';
 import {GetServerSideProps} from 'next';
@@ -93,118 +94,133 @@ export default function Booking({
       ) / STEP_MINUTES,
     ) + 1;
 
+  const submitDisabled =
+    !primaryPerson || !primaryEmail || otherPersons.some((p) => !p);
+
   return (
     <Page>
       {errorDialog}
       <Box boxShadow="sm" bg="white" borderRadius="md">
-        <Table size="md">
-          <Tbody>
-            <Tr>
-              <Th pr="0" isNumeric>
-                Tag
-              </Th>
-              <Td fontWeight="semibold">
-                {startTime.toLocaleDateString('de', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: 'long',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                })}{' '}
-                Uhr
-              </Td>
-            </Tr>
-            <Tr>
-              <Th pr="0" isNumeric>
-                bis
-              </Th>
-              <Td fontWeight="semibold">
-                {steps < 2 ? (
-                  renderTime(maxEndTime)
-                ) : (
-                  <Select
-                    fontWeight="semibold"
-                    backgroundColor="white"
-                    value={formatISO(endTime)}
-                    onChange={(e) => setEndTime(parseISO(e.target.value))}
-                  >
-                    {Array.from(Array(steps)).map((_, i) => {
-                      const date = add(earliestEnd, {
-                        minutes: i * STEP_MINUTES,
-                      });
-                      return (
-                        <option key={i} value={formatISO(date)}>
-                          {renderTime(date)}
-                        </option>
-                      );
-                    })}
-                  </Select>
-                )}
-              </Td>
-            </Tr>
-            <Tr>
-              <Th minH="64px" pr="0" isNumeric>
-                Bereich
-              </Th>
-              <Td fontWeight="semibold">{area}</Td>
-            </Tr>
-            <Tr>
-              <Th pr="0" isNumeric>
-                Name
-              </Th>
-              <Td fontWeight="semibold">
-                <Input
-                  placeholder="Deine Name"
-                  onChange={(e) => setPrimaryPerson(e.target.value)}
-                />
-              </Td>
-            </Tr>
-            <Tr>
-              <Th pr="0" isNumeric>
-                E-Mail
-              </Th>
-              <Td fontWeight="semibold">
-                <Input
-                  placeholder="Deine E-Mail-Adresse"
-                  type="email"
-                  onChange={(e) => setPrimaryEmail(e.target.value)}
-                />
-              </Td>
-            </Tr>
-            <Tr>
-              <Th pr="0" pt="6" verticalAlign="top" isNumeric>
-                Gäste
-              </Th>
-              <Td fontWeight="semibold">
-                {Array.from(Array(partySize - 1)).map((_, i) => (
-                  <Input
-                    key={i}
-                    placeholder="Name"
-                    mt={i > 0 ? 2 : 0}
-                    onChange={(e) => {
-                      const newPersons = [...otherPersons];
-                      newPersons[i] = e.target.value;
-                      setOtherPersons(newPersons);
-                    }}
-                  />
-                ))}
-              </Td>
-            </Tr>
-          </Tbody>
-        </Table>
-        <Box p="5">
-          <Button
-            colorScheme="blue"
-            isFullWidth
-            isLoading={loading}
-            isDisabled={
-              !primaryPerson || !primaryEmail || otherPersons.some((p) => !p)
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!submitDisabled) {
+              requestReservation();
             }
-            onClick={() => requestReservation()}
-          >
-            Reservieren
-          </Button>
-        </Box>
+          }}
+        >
+          <Table size="md">
+            <Tbody>
+              <Tr>
+                <Th pr="0" isNumeric>
+                  Tag
+                </Th>
+                <Td fontWeight="semibold">
+                  {startTime.toLocaleDateString('de', {
+                    weekday: 'long',
+                    day: '2-digit',
+                    month: 'long',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    timeZone: 'Europe/Berlin',
+                  })}{' '}
+                  Uhr
+                </Td>
+              </Tr>
+              <Tr>
+                <Th pr="0" isNumeric>
+                  bis
+                </Th>
+                <Td fontWeight="semibold">
+                  {steps < 2 ? (
+                    renderTime(maxEndTime)
+                  ) : (
+                    <Select
+                      fontWeight="semibold"
+                      backgroundColor="white"
+                      value={formatISO(endTime)}
+                      onChange={(e) => setEndTime(parseISO(e.target.value))}
+                    >
+                      {Array.from(Array(steps)).map((_, i) => {
+                        const date = add(earliestEnd, {
+                          minutes: i * STEP_MINUTES,
+                        });
+                        return (
+                          <option key={i} value={formatISO(date)}>
+                            {renderTime(date)}
+                          </option>
+                        );
+                      })}
+                    </Select>
+                  )}
+                </Td>
+              </Tr>
+              <Tr>
+                <Th minH="64px" pr="0" isNumeric>
+                  Bereich
+                </Th>
+                <Td fontWeight="semibold">{area}</Td>
+              </Tr>
+              <Tr>
+                <Th pr="0" isNumeric>
+                  Name
+                </Th>
+                <Td fontWeight="semibold">
+                  <Input
+                    autoComplete="name"
+                    placeholder="Deine Name"
+                    onChange={(e) => setPrimaryPerson(e.target.value)}
+                  />
+                </Td>
+              </Tr>
+              <Tr>
+                <Th pr="0" isNumeric>
+                  E-Mail
+                </Th>
+                <Td fontWeight="semibold">
+                  <Input
+                    placeholder="Deine E-Mail-Adresse"
+                    type="email"
+                    autoComplete="home email"
+                    onChange={(e) => setPrimaryEmail(e.target.value)}
+                  />
+                </Td>
+              </Tr>
+              <Tr>
+                <Th pr="0" pt="6" verticalAlign="top" isNumeric>
+                  Gäste
+                </Th>
+                <Td fontWeight="semibold">
+                  <VStack>
+                    {Array.from(Array(partySize - 1)).map((_, i) => (
+                      <Input
+                        key={i}
+                        autoComplete="off"
+                        placeholder="Name"
+                        onChange={(e) => {
+                          const newPersons = [...otherPersons];
+                          newPersons[i] = e.target.value;
+                          setOtherPersons(newPersons);
+                        }}
+                      />
+                    ))}
+                  </VStack>
+                </Td>
+              </Tr>
+            </Tbody>
+          </Table>
+          <Box p="5">
+            <Button
+              type="submit"
+              colorScheme="blue"
+              isFullWidth
+              isLoading={loading}
+              isDisabled={submitDisabled}
+            >
+              Reservieren
+            </Button>
+          </Box>
+        </form>
       </Box>
     </Page>
   );
@@ -215,6 +231,7 @@ function renderTime(date: Date): string {
     date.toLocaleTimeString('de', {
       minute: '2-digit',
       hour: '2-digit',
+      timeZone: 'Europe/Berlin',
     }) + ' Uhr'
   );
 }
