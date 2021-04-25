@@ -12,7 +12,7 @@ import Link from 'next/link';
 
 export default function Slot({children}: {children: any}) {
   return (
-    <Container maxW="container.md" pt="10">
+    <Container maxW="container.md" pt="10" pb="20">
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>

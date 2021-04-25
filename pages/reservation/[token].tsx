@@ -10,6 +10,7 @@ import {
   Spinner,
   Table,
   Tbody,
+  Text,
   Td,
   Th,
   Tr,
@@ -22,10 +23,10 @@ import {
   useReservationQuery,
 } from '../../types/graphql';
 import Page from '../../components/Page';
-import Reservation from '../../components/Reservation';
 import Link from 'next/link';
 import CancelButton from '../../components/CancelButton';
 import GuestList from '../../components/GuestList';
+import {ChevronRightIcon} from '@chakra-ui/icons';
 
 gql`
   query Reservation($token: String!) {
@@ -94,8 +95,8 @@ export default function Reservations() {
     <Page>
       {reservation ? (
         <VStack spacing="3" alignItems="stretch">
-          <Heading size="md" textAlign="center" pt="8">
-            Deine Reservierung
+          <Heading size="md" textAlign="center">
+            Reservierung #{reservation.id}
           </Heading>
           <Box boxShadow="sm" bgColor="white" borderRadius="lg">
             <Table size="md">
@@ -158,6 +159,14 @@ export default function Reservations() {
                   <Td fontWeight="semibold">{reservation.primaryPerson}</Td>
                 </Tr>
                 <Tr>
+                  <Th pr="0" isNumeric>
+                    Platz
+                  </Th>
+                  <Td fontWeight="semibold">
+                    für bis zu {reservation.table.maxCapacity} Personen
+                  </Td>
+                </Tr>
+                <Tr>
                   <Th pr="0" pt="6" verticalAlign="top" isNumeric>
                     Gäste
                   </Th>
@@ -190,16 +199,42 @@ export default function Reservations() {
               <CancelButton token={reservation.token} />
             </HStack>
           </Box>
-          {(data?.reservationForToken?.reservationsFromSamePerson ?? 0) > 0 && (
+          {reservation.reservationsFromSamePerson.length > 0 && (
             <>
               <Heading size="md" textAlign="center" pt="8">
                 Weitere Reservierungen
               </Heading>
-              {data?.reservationForToken?.reservationsFromSamePerson.map(
-                (reservation) => (
-                  <Reservation key={reservation.id} data={reservation} />
-                ),
-              )}
+              {reservation.reservationsFromSamePerson.map((r) => (
+                <Link href={`/reservation/${r.token}`}>
+                  <Box
+                    cursor="pointer"
+                    key={r.id}
+                    boxShadow="sm"
+                    bgColor="white"
+                    borderRadius="lg"
+                    p="5"
+                  >
+                    <HStack>
+                      <VStack spacing="0" alignItems="flex-start">
+                        <Heading size="sm">Reservierung #{r.id}</Heading>
+                        <Text>
+                          {r.startTime.toLocaleString('de', {
+                            day: '2-digit',
+                            month: 'long',
+                            weekday: 'long',
+                            minute: '2-digit',
+                            hour: '2-digit',
+                            timeZone: 'Europe/Berlin',
+                          })}{' '}
+                          Uhr
+                        </Text>
+                      </VStack>
+                      <Spacer />
+                      <ChevronRightIcon boxSize="6" color="gray.400" />
+                    </HStack>
+                  </Box>
+                </Link>
+              ))}
             </>
           )}
         </VStack>

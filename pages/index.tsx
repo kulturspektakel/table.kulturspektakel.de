@@ -1,9 +1,8 @@
-import {HStack, Select, VStack} from '@chakra-ui/react';
+import {Stack, Select, VStack} from '@chakra-ui/react';
 import React, {useState} from 'react';
 import Slots from '../components/Slots';
 import {formatISO, isSameDay, parseISO} from 'date-fns';
 import Page from '../components/Page';
-import {useRouter} from 'next/dist/client/router';
 
 const DATES = [
   new Date('2021-07-23'),
@@ -19,7 +18,7 @@ export default function Home() {
   return (
     <Page>
       <VStack spacing="10">
-        <HStack spacing="10">
+        <Stack spacing={['3', '10']} direction={['column', 'row']} width="100%">
           <Select
             fontWeight="semibold"
             backgroundColor="white"
@@ -27,7 +26,6 @@ export default function Home() {
               representation: 'date',
             })}
             onChange={(e) => setStartTime(parseISO(e.target.value))}
-            minW="64"
           >
             {DATES.map((d, i) => (
               <option key={i} value={formatISO(d, {representation: 'date'})}>
@@ -45,7 +43,6 @@ export default function Home() {
             fontWeight="semibold"
             backgroundColor="white"
             value={partySize}
-            minW="48"
             onChange={(e) => setPartySize(parseInt(e.target.value, 10))}
           >
             {Array.from(Array(9)).map((_, i) => (
@@ -54,7 +51,7 @@ export default function Home() {
               </option>
             ))}
           </Select>
-        </HStack>
+        </Stack>
         <Slots day={startTime} partySize={partySize} />
       </VStack>
     </Page>

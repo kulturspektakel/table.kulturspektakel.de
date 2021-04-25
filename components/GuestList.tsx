@@ -77,11 +77,10 @@ export default function useGuestListMutation({
       {errorDialog}
       <VStack>
         {Array.from(Array(rows)).map((_, i) => (
-          <InputGroup>
+          <InputGroup key={i}>
             <Input
               placeholder={`Gast ${i + 1}`}
               value={otherPersons[i] ?? ''}
-              key={i}
               onChange={(e) => callback(i, e.target.value)}
             />
             <InputRightElement>

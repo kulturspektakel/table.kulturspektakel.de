@@ -71,12 +71,17 @@ export default function Slots(props: {day: Date; partySize: number}) {
 
   const w = `${100 / data.areas.length}%`;
 
+  const HYPHENS: Record<string, JSX.Element> = {
+    wb: <>Wald&shy;bühne</>,
+    wbg: <>Weiß&shy;bier&shy;garten</>,
+  };
+
   return (
     <Flex w="100%">
       {data.areas.map((area) => (
         <Box h="10" minW={w} maxW={w} key={area.id}>
-          <Heading size="sm" mb={4} textAlign="center" noOfLines={2} h="12">
-            {area.displayName}
+          <Heading size="sm" mb={0} textAlign="center" noOfLines={2} h="12">
+            {HYPHENS[area.id] ?? area.displayName}
           </Heading>
           <AreaSlots
             area={area}
