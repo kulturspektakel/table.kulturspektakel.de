@@ -50,7 +50,7 @@ export function SlotLink({
         query,
       }}
     >
-      {children}
+      <Box w="100%">{children}</Box>
     </Link>
   );
 }

@@ -119,13 +119,15 @@ function AreaSlots(props: {
 
         const band = props.area.bandsPlaying.find((i) => isWithin(i, time));
         return (
-          <SlotPopover band={available ? band : undefined}>
+          <SlotPopover
+            band={available ? band : undefined}
+            key={time.toString()}
+          >
             <SlotLink
               startTime={time}
               area={props.area}
               endTime={mx}
               partySize={props.partySize}
-              key={time.toString()}
             >
               <SlotContent time={time} available={available} open={open} />
             </SlotLink>
