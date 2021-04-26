@@ -66,6 +66,7 @@ export type Band = {
   genre?: Maybe<Scalars['String']>;
   startTime: Scalars['DateTime'];
   endTime: Scalars['DateTime'];
+  description?: Maybe<Scalars['String']>;
 };
 
 export type Mutation = {
@@ -101,7 +102,7 @@ export type MutationUpdateReservationArgs = {
 
 export type MutationCreateOrderArgs = {
   tableId: Scalars['ID'];
-  products: Array<OrderItem>;
+  products: Array<OrderItemInput>;
   payment: OrderPayment;
 };
 
@@ -115,10 +116,21 @@ export type Order = {
   id: Scalars['Int'];
   payment: OrderPayment;
   tokens: Scalars['Int'];
+  createdAt: Scalars['DateTime'];
+  table?: Maybe<Table>;
+  items: Array<OrderItem>;
   total?: Maybe<Scalars['Int']>;
 };
 
 export type OrderItem = {
+  __typename?: 'OrderItem';
+  id: Scalars['Int'];
+  note?: Maybe<Scalars['String']>;
+  amount: Scalars['Int'];
+  name: Scalars['String'];
+};
+
+export type OrderItemInput = {
   productId: Scalars['Int'];
   amount: Scalars['Int'];
   note?: Maybe<Scalars['String']>;
@@ -177,6 +189,7 @@ export type Query = {
   viewer?: Maybe<Viewer>;
   node?: Maybe<Node>;
   productLists: Array<ProductList>;
+  orders: Array<Order>;
 };
 
 export type QueryReservationForTokenArgs = {

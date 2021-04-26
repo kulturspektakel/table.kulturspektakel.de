@@ -15,6 +15,7 @@ import {
   Th,
   Tr,
   VStack,
+  Button,
 } from '@chakra-ui/react';
 import {gql} from '@apollo/client';
 import {
@@ -26,7 +27,7 @@ import Page from '../../components/Page';
 import Link from 'next/link';
 import CancelButton from '../../components/CancelButton';
 import GuestList from '../../components/GuestList';
-import {ChevronRightIcon} from '@chakra-ui/icons';
+import {ChevronRightIcon, WarningTwoIcon} from '@chakra-ui/icons';
 
 gql`
   query Reservation($token: String!) {
@@ -78,7 +79,7 @@ const RESERVATION_COLOR: Record<ReservationStatus, string> = {
 export default function Reservations() {
   const {query} = useRouter();
   const token = String(query.token);
-  const {data} = useReservationQuery({variables: {token}});
+  const {data, loading} = useReservationQuery({variables: {token}});
   const reservation = data?.reservationForToken;
 
   const [confirmReservation] = useConfimReservationMutation({
@@ -93,7 +94,25 @@ export default function Reservations() {
 
   return (
     <Page>
-      {reservation ? (
+      {!reservation && loading && (
+        <Center>
+          <Spinner />
+        </Center>
+      )}
+      {!reservation && !loading && (
+        <Center flexDirection="column">
+          <WarningTwoIcon boxSize="6" color="yellow.500" mt="6" />
+          <Heading mt="2" mb="6" size="sm">
+            Reservierung nicht vorhanden
+          </Heading>
+          <Link href="/">
+            <Button colorScheme="green" size="sm">
+              Neue Reservierung
+            </Button>
+          </Link>
+        </Center>
+      )}
+      {reservation && (
         <VStack spacing="3" alignItems="stretch">
           <Heading size="md" textAlign="center">
             Reservierung #{reservation.id}
@@ -163,7 +182,7 @@ export default function Reservations() {
                     Platz
                   </Th>
                   <Td fontWeight="semibold">
-                    für bis zu {reservation.table.maxCapacity} Personen
+                    bis zu {reservation.table.maxCapacity} Personen
                   </Td>
                 </Tr>
                 <Tr>
@@ -238,10 +257,6 @@ export default function Reservations() {
             </>
           )}
         </VStack>
-      ) : (
-        <Center>
-          <Spinner />
-        </Center>
       )}
     </Page>
   );

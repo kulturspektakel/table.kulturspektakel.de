@@ -10,6 +10,7 @@ import {
   max,
   isWithinInterval,
   differenceInMinutes,
+  isFuture,
 } from 'date-fns';
 import {SlotContent, SlotLink, SlotPopover} from './Slot';
 
@@ -107,23 +108,28 @@ function AreaSlots(props: {
       {Array.from(Array(steps)).map((_, i) => {
         const time = add(props.from, {minutes: STEP_MINUTES * i});
         const open = isOpen(props.area.openingHour, time);
+        // allows selecting, if less than
         const mx = maxAvailability(props.area.availability, time);
         const available =
-          (open && mx && differenceInMinutes(mx, time) >= 90) ?? false;
+          (open &&
+            mx &&
+            isFuture(time) &&
+            differenceInMinutes(mx, time) >= 90) ??
+          false;
 
         const band = props.area.bandsPlaying.find((i) => isWithin(i, time));
         return (
-          <SlotLink
-            startTime={time}
-            area={props.area}
-            endTime={mx}
-            partySize={props.partySize}
-            key={time.toString()}
-          >
-            <SlotPopover band={available ? band : undefined}>
+          <SlotPopover band={available ? band : undefined}>
+            <SlotLink
+              startTime={time}
+              area={props.area}
+              endTime={mx}
+              partySize={props.partySize}
+              key={time.toString()}
+            >
               <SlotContent time={time} available={available} open={open} />
-            </SlotPopover>
-          </SlotLink>
+            </SlotLink>
+          </SlotPopover>
         );
       })}
     </VStack>

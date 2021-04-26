@@ -9,6 +9,8 @@ import {
   PopoverBody,
   PopoverArrow,
   Box,
+  useMediaQuery,
+  Circle,
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import {gql} from '@apollo/client';
@@ -48,7 +50,7 @@ export function SlotLink({
         query,
       }}
     >
-      <Box w="100%">{children}</Box>
+      {children}
     </Link>
   );
 }
@@ -67,31 +69,51 @@ export function SlotPopover({
   children: any;
   band?: BandPopoverFragment;
 }) {
-  if (!band) {
+  const [small, touch] = useMediaQuery([
+    '(max-width: 500px)',
+    '(pointer: coarse)',
+  ]);
+  if (!band || touch || small) {
     return children;
   }
 
   return (
-    <Popover trigger="hover" placement="left" isLazy>
-      <PopoverTrigger>
-        <Box w="100%">{children}</Box>
-      </PopoverTrigger>
-      <PopoverContent
-        bg="gray.900"
-        color="white"
-        borderColor="gray.900"
-        fontSize="sm"
+    <Box position="relative" w="100%">
+      <Popover
+        trigger={touch ? 'click' : 'hover'}
+        placement="right-start"
+        isLazy
       >
-        <PopoverArrow bg="gray.900" />
-        <PopoverBody>
-          <Text>
-            <strong>{band.name}</strong> ({band.genre})
-          </Text>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore.
-        </PopoverBody>
-      </PopoverContent>
-    </Popover>
+        <PopoverTrigger>
+          <Circle
+            userSelect="none"
+            size="5"
+            position="absolute"
+            right="-2px"
+            top="-2px"
+            fontSize="13"
+            bgColor="gray.300"
+          >
+            ♫
+          </Circle>
+        </PopoverTrigger>
+        <PopoverContent
+          bg="gray.900"
+          color="white"
+          borderColor="gray.900"
+          fontSize="sm"
+        >
+          <PopoverArrow bg="gray.900" />
+          <PopoverBody>
+            <Text>
+              <strong>{band.name}</strong>
+              {band.genre && <> ({band.genre})</>}
+            </Text>
+          </PopoverBody>
+        </PopoverContent>
+      </Popover>
+      {children}
+    </Box>
   );
 }
 
