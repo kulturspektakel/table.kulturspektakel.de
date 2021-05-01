@@ -3,7 +3,7 @@ import {Box, Center, Heading, Text, VStack} from '@chakra-ui/react';
 import React from 'react';
 import Page from '../components/Page';
 
-export default function Confirm() {
+export default function Confirm(): React.ReactElement {
   return (
     <Page>
       <Box boxShadow="sm" bg="white" borderRadius="md" p="5">

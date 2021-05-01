@@ -11,7 +11,7 @@ const DATES = [
   new Date('2021-07-25'),
 ];
 
-export default function Home() {
+export default function Home(): React.ReactElement {
   const [partySize, setPartySize] = useState<number | null>(null);
   const defaultDate = DATES.find((d) => isSameDay(d, new Date())) ?? DATES[0];
   const [startTime, setStartTime] = useState(defaultDate);
@@ -26,7 +26,9 @@ export default function Home() {
             value={formatISO(startTime, {
               representation: 'date',
             })}
-            onChange={(e) => setStartTime(parseISO(e.target.value))}
+            onChange={(e) =>
+              setStartTime(parseISO(e.target.value + 'T10:00:00'))
+            }
           >
             {DATES.map((d, i) => (
               <option key={i} value={formatISO(d, {representation: 'date'})}>

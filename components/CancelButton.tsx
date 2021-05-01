@@ -12,28 +12,35 @@ gql`
   }
 `;
 
-export default function CancelButton(props: {token: string}) {
+export default function CancelButton(props: {
+  token: string;
+}): React.ReactElement {
   const [save, {loading, error}] = useCancelReservationMutation({
     errorPolicy: 'ignore',
   });
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [isCancled, setIsCancled] = useState(false);
   const confirmDialog = useDialog({
-    title: 'Reservierung absagen',
-    body: 'Möchtest du die Reservierung wirklich absagen?',
-    closeButton: 'Abbrechen',
+    title: isCancled ? 'Reservierung abgesagt' : 'Reservierung absagen',
+    body: isCancled
+      ? 'Deine Reservierung wurde abgesagt. Wir hoffen, dass du trotzdem zum Kult kommst.'
+      : 'Möchtest du die Reservierung wirklich absagen?',
+    closeButton: isCancled ? undefined : 'Abbrechen',
     action: {
       callback: () => {
-        save({
-          variables: {
-            token: props.token,
-          },
-        }).then(() => {
+        if (isCancled) {
           router.push('/');
-        });
+        } else {
+          save({
+            variables: {
+              token: props.token,
+            },
+          }).then(() => setIsCancled(true));
+        }
       },
-      label: 'Absagen',
-      colorScheme: 'red',
+      label: isCancled ? 'OK' : 'Absagen',
+      colorScheme: isCancled ? 'blue' : 'red',
       disabled: loading,
     },
     isOpen,

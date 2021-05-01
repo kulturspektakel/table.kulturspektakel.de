@@ -1,18 +1,22 @@
 import '../styles/globals.css';
 import React, {useMemo} from 'react';
-import NextApp, {AppContext, AppInitialProps, AppProps} from 'next/app';
-import {ApolloProvider, NormalizedCacheObject} from '@apollo/client';
+import {AppProps} from 'next/app';
 import {ChakraProvider, extendTheme} from '@chakra-ui/react';
-import {initializeApollo} from '../utils/apollo';
+import {
+  ApolloProvider,
+  ApolloClient,
+  InMemoryCache,
+  NormalizedCacheObject,
+  ApolloLink,
+  HttpLink,
+} from '@apollo/client';
+import {withScalars} from 'apollo-link-scalars';
+import introspectionResult from '../types/graphql.schema.json';
+import {buildClientSchema, IntrospectionQuery} from 'graphql';
+import {GraphQLDateTime, GraphQLDate} from 'graphql-scalars';
 
-type Props = {
-  initialApolloState: NormalizedCacheObject;
-};
-
-const App = ({Component, pageProps, initialApolloState}: AppProps & Props) => {
-  const client = useMemo(() => initializeApollo(initialApolloState), [
-    initialApolloState,
-  ]);
+const App = ({Component, pageProps}: AppProps): React.ReactElement => {
+  const client = useMemo(() => initializeApollo(), []);
 
   const theme = extendTheme({
     styles: {
@@ -33,16 +37,31 @@ const App = ({Component, pageProps, initialApolloState}: AppProps & Props) => {
   );
 };
 
-App.getInitialProps = async (
-  app: AppContext,
-): Promise<AppInitialProps & Props> => {
-  const apolloClient = initializeApollo();
-  const appProps = await NextApp.getInitialProps(app);
+let apolloClient: ApolloClient<NormalizedCacheObject> | null = null;
+function initializeApollo() {
+  if (apolloClient) {
+    return apolloClient;
+  }
+  const scalarLink: ApolloLink = withScalars({
+    schema: buildClientSchema(
+      (introspectionResult as unknown) as IntrospectionQuery,
+    ),
+    typesMap: {
+      DateTime: GraphQLDateTime,
+      Date: GraphQLDate,
+    },
+  }) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-  return {
-    ...appProps,
-    initialApolloState: apolloClient.cache.extract(),
-  };
-};
+  apolloClient = new ApolloClient({
+    ssrMode: typeof window === 'undefined', // set to true for SSR
+    cache: new InMemoryCache(),
+    link: ApolloLink.from([
+      scalarLink,
+      new HttpLink({uri: 'https://api.kulturspektakel.de/graphql'}),
+    ]),
+  });
+
+  return apolloClient;
+}
 
 export default App;

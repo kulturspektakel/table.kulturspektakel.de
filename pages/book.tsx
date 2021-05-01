@@ -57,7 +57,7 @@ export default function Booking({
   partySize,
   areaId,
   area,
-}: Props) {
+}: Props): React.ReactElement {
   const startTime = new Date(s);
   const maxEndTime = new Date(e);
   const earliestEnd = add(startTime, {minutes: MIN_DURATION_MINUTES});
@@ -65,7 +65,7 @@ export default function Booking({
   const [primaryPerson, setPrimaryPerson] = useState('');
   const [primaryEmail, setPrimaryEmail] = useState('');
   const [otherPersons, setOtherPersons] = useState<string[]>(
-    Array.from(Array(partySize - 1)).map((_) => ''),
+    Array.from(Array(partySize - 1)).map(() => ''),
   );
   const [requestReservation, {loading, error, data}] = useRequestMutation({
     variables: {
@@ -147,7 +147,11 @@ export default function Booking({
                         });
                         return (
                           <option key={i} value={formatISO(date)}>
-                            {renderTime(date)}
+                            {renderTime(date)} (
+                            {(
+                              differenceInMinutes(date, startTime) / 60
+                            ).toLocaleString('de')}{' '}
+                            Stunden)
                           </option>
                         );
                       })}
@@ -241,6 +245,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 ) => {
   const {startTime, endTime, partySize, areaId, area} = context.query;
   if (!startTime || !endTime || !partySize || !areaId || !area) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const props: any = undefined;
     return {
       redirect: {

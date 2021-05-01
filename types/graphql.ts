@@ -29,6 +29,7 @@ export type Area = Node & {
   displayName: Scalars['String'];
   table: Array<Table>;
   openingHour: Array<Availability>;
+  reservations: Array<Reservation>;
   availability: Array<Availability>;
   bandsPlaying: Array<Band>;
 };
@@ -41,6 +42,10 @@ export type AreaTableArgs = {
 };
 
 export type AreaOpeningHourArgs = {
+  day?: Maybe<Scalars['Date']>;
+};
+
+export type AreaReservationsArgs = {
   day?: Maybe<Scalars['Date']>;
 };
 
@@ -270,15 +275,6 @@ export type UpdateReservationMutation = {__typename?: 'Mutation'} & {
   >;
 };
 
-export type ReservationFragmentFragment = {__typename?: 'Reservation'} & Pick<
-  Reservation,
-  'id' | 'token' | 'startTime' | 'endTime' | 'status'
-> & {
-    table: {__typename?: 'Table'} & Pick<Table, 'maxCapacity'> & {
-        area: {__typename?: 'Area'} & Pick<Area, 'displayName'>;
-      };
-  };
-
 export type BandPopoverFragment = {__typename?: 'Band'} & Pick<
   Band,
   'name' | 'genre'
@@ -346,7 +342,10 @@ export type ReservationQuery = {__typename?: 'Query'} & {
             area: {__typename?: 'Area'} & Pick<Area, 'displayName'>;
           };
         reservationsFromSamePerson: Array<
-          {__typename?: 'Reservation'} & ReservationFragmentFragment
+          {__typename?: 'Reservation'} & Pick<
+            Reservation,
+            'id' | 'token' | 'startTime'
+          >
         >;
       }
   >;
@@ -360,27 +359,15 @@ export type ConfimReservationMutation = {__typename?: 'Mutation'} & {
   confirmReservation?: Maybe<
     {__typename?: 'Reservation'} & Pick<Reservation, 'id' | 'status'> & {
         reservationsFromSamePerson: Array<
-          {__typename?: 'Reservation'} & ReservationFragmentFragment
+          {__typename?: 'Reservation'} & Pick<
+            Reservation,
+            'id' | 'token' | 'startTime'
+          >
         >;
       }
   >;
 };
 
-export const ReservationFragmentFragmentDoc = gql`
-  fragment ReservationFragment on Reservation {
-    id
-    token
-    startTime
-    endTime
-    table {
-      maxCapacity
-      area {
-        displayName
-      }
-    }
-    status
-  }
-`;
 export const BandPopoverFragmentDoc = gql`
   fragment BandPopover on Band {
     name
@@ -630,11 +617,12 @@ export const ReservationDocument = gql`
       primaryPerson
       otherPersons
       reservationsFromSamePerson {
-        ...ReservationFragment
+        id
+        token
+        startTime
       }
     }
   }
-  ${ReservationFragmentFragmentDoc}
 `;
 
 /**
@@ -691,11 +679,12 @@ export const ConfimReservationDocument = gql`
       id
       status
       reservationsFromSamePerson {
-        ...ReservationFragment
+        id
+        token
+        startTime
       }
     }
   }
-  ${ReservationFragmentFragmentDoc}
 `;
 export type ConfimReservationMutationFn = Apollo.MutationFunction<
   ConfimReservationMutation,

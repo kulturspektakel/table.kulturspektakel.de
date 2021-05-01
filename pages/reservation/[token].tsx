@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {useRouter} from 'next/dist/client/router';
+import {useRouter} from 'next/router';
 import {
   Badge,
   Box,
@@ -16,6 +16,7 @@ import {
   Tr,
   VStack,
   Button,
+  Input,
 } from '@chakra-ui/react';
 import {gql} from '@apollo/client';
 import {
@@ -46,7 +47,9 @@ gql`
       primaryPerson
       otherPersons
       reservationsFromSamePerson {
-        ...ReservationFragment
+        id
+        token
+        startTime
       }
     }
   }
@@ -56,7 +59,9 @@ gql`
       id
       status
       reservationsFromSamePerson {
-        ...ReservationFragment
+        id
+        token
+        startTime
       }
     }
   }
@@ -76,7 +81,7 @@ const RESERVATION_COLOR: Record<ReservationStatus, string> = {
   [ReservationStatus.Cleared]: 'red',
 };
 
-export default function Reservations() {
+export default function Reservations(): React.ReactElement {
   const {query} = useRouter();
   const token = String(query.token);
   const {data, loading} = useReservationQuery({variables: {token}});
@@ -90,7 +95,7 @@ export default function Reservations() {
     if (reservation?.status === ReservationStatus.Pending) {
       confirmReservation();
     }
-  }, [reservation]);
+  }, [confirmReservation, reservation]);
 
   return (
     <Page>
@@ -172,24 +177,17 @@ export default function Reservations() {
                   </Td>
                 </Tr>
                 <Tr>
-                  <Th pr="0" isNumeric>
-                    Name
-                  </Th>
-                  <Td fontWeight="semibold">{reservation.primaryPerson}</Td>
-                </Tr>
-                <Tr>
-                  <Th pr="0" isNumeric>
-                    Platz
-                  </Th>
-                  <Td fontWeight="semibold">
-                    bis zu {reservation.table.maxCapacity} Personen
-                  </Td>
-                </Tr>
-                <Tr>
                   <Th pr="0" pt="6" verticalAlign="top" isNumeric>
                     Gäste
                   </Th>
-                  <Td fontWeight="semibold">
+                  <Td>
+                    <Input
+                      value={reservation.primaryPerson}
+                      style={{opacity: 1}}
+                      bgColor="gray.50"
+                      disabled
+                      mb="2"
+                    />
                     <GuestList
                       maxCapacity={reservation.table.maxCapacity}
                       initialOtherPersons={reservation.otherPersons}
@@ -224,7 +222,7 @@ export default function Reservations() {
                 Weitere Reservierungen
               </Heading>
               {reservation.reservationsFromSamePerson.map((r) => (
-                <Link href={`/reservation/${r.token}`}>
+                <Link href={`/reservation/${r.token}`} key={r.id}>
                   <Box
                     cursor="pointer"
                     key={r.id}

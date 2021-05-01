@@ -7,12 +7,10 @@ import {
   InputGroup,
   InputRightElement,
   VStack,
+  Text,
 } from '@chakra-ui/react';
 import React, {useCallback, useEffect, useState} from 'react';
-import {
-  useCancelReservationMutation,
-  useUpdateReservationMutation,
-} from '../types/graphql';
+import {useUpdateReservationMutation} from '../types/graphql';
 import useErrorDialog from './useErrorDialog';
 
 gql`
@@ -32,20 +30,23 @@ export default function useGuestListMutation({
   token: string;
   maxCapacity: number;
   initialOtherPersons: string[];
-}) {
+}): React.ReactElement {
   const [isDirty, setIsDirty] = useState(false);
   useEffect(() => setOtherPersons(initialOtherPersons), [initialOtherPersons]);
   const [otherPersons, setOtherPersons] = useState(initialOtherPersons);
   const [save, {loading, error}] = useUpdateReservationMutation();
   const callback = useCallback(
     (i, value) => {
+      if (i >= otherPersons.length && value == null) {
+        return;
+      }
       const newPersons = [...otherPersons];
       if (value == null) {
         newPersons.splice(i, 1);
       } else {
         newPersons[i] = value;
       }
-      setOtherPersons(newPersons);
+      setOtherPersons(newPersons.filter(Boolean));
       setIsDirty(true);
     },
     [otherPersons, setOtherPersons],
@@ -62,7 +63,7 @@ export default function useGuestListMutation({
           save({
             variables: {
               otherPersons,
-              token: token!,
+              token: token ?? '',
             },
           })
             .then(() => {
@@ -79,7 +80,7 @@ export default function useGuestListMutation({
         {Array.from(Array(rows)).map((_, i) => (
           <InputGroup key={i}>
             <Input
-              placeholder={`Gast ${i + 1}`}
+              placeholder={`Gast ${i + 2}/${maxCapacity}`}
               value={otherPersons[i] ?? ''}
               onChange={(e) => callback(i, e.target.value)}
             />
@@ -105,6 +106,19 @@ export default function useGuestListMutation({
           Speichern
         </Button>
       )}
+      <Text
+        visibility={
+          maxCapacity > otherPersons.length + 1 ? 'visible' : 'hidden'
+        }
+        fontWeight="normal"
+        fontSize="sm"
+        mt="3"
+        color="gray.600"
+        maxW="500px"
+      >
+        Am Tisch, den wir für dich reserviert haben, können bis zu {maxCapacity}
+        &nbsp;Personen sitzen. Du kannst noch weitere Gäste eintragen.
+      </Text>
     </form>
   );
 }

@@ -13,6 +13,7 @@ import {
   isFuture,
 } from 'date-fns';
 import {SlotContent, SlotLink, SlotPopover} from './Slot';
+import Sticky from './Sticky';
 
 gql`
   query Slots($partySize: Int!, $day: Date!) {
@@ -38,7 +39,10 @@ gql`
 
 export const STEP_MINUTES = 30;
 
-export default function Slots(props: {day: Date; partySize: number}) {
+export default function Slots(props: {
+  day: Date;
+  partySize: number;
+}): React.ReactElement {
   const {data} = useSlotsQuery({
     variables: {
       partySize: props.partySize,
@@ -78,21 +82,35 @@ export default function Slots(props: {day: Date; partySize: number}) {
   };
 
   return (
-    <Flex w="100%">
-      {data.areas.map((area) => (
-        <Box h="10" minW={w} maxW={w} key={area.id}>
-          <Heading size="sm" mb={0} textAlign="center" noOfLines={2} h="12">
-            {HYPHENS[area.id] ?? area.displayName}
-          </Heading>
-          <AreaSlots
-            area={area}
-            from={from}
-            until={until}
-            partySize={props.partySize}
-          />
-        </Box>
-      ))}
-    </Flex>
+    <Box w="100%">
+      <Sticky>
+        {(ref, style) => (
+          <Box h="12" w="100%" ref={ref}>
+            <Flex h="12" style={style} bgColor="gray.50">
+              {data.areas.map((area) => (
+                <Center h="100%" minW={w} maxW={w} key={area.id}>
+                  <Heading size="sm" mb={0} textAlign="center" noOfLines={2}>
+                    {HYPHENS[area.id] ?? area.displayName}
+                  </Heading>
+                </Center>
+              ))}
+            </Flex>
+          </Box>
+        )}
+      </Sticky>
+      <Flex w="100%">
+        {data.areas.map((area) => (
+          <Box minW={w} maxW={w} key={area.id}>
+            <AreaSlots
+              area={area}
+              from={from}
+              until={until}
+              partySize={props.partySize}
+            />
+          </Box>
+        ))}
+      </Flex>
+    </Box>
   );
 }
 
