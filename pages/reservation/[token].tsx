@@ -81,7 +81,7 @@ const RESERVATION_COLOR: Record<ReservationStatus, string> = {
   [ReservationStatus.Cleared]: 'red',
 };
 
-export default function Reservations(): React.ReactElement {
+export default function Reservations() {
   const {query} = useRouter();
   const token = String(query.token);
   const {data, loading} = useReservationQuery({variables: {token}});

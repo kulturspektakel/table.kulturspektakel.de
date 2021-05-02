@@ -15,7 +15,7 @@ import introspectionResult from '../types/graphql.schema.json';
 import {buildClientSchema, IntrospectionQuery} from 'graphql';
 import {GraphQLDateTime, GraphQLDate} from 'graphql-scalars';
 
-const App = ({Component, pageProps}: AppProps): React.ReactElement => {
+const App = ({Component, pageProps}: AppProps) => {
   const client = useMemo(() => initializeApollo(), []);
 
   const theme = extendTheme({

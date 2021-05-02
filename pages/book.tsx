@@ -57,7 +57,7 @@ export default function Booking({
   partySize,
   areaId,
   area,
-}: Props): React.ReactElement {
+}: Props) {
   const startTime = new Date(s);
   const maxEndTime = new Date(e);
   const earliestEnd = add(startTime, {minutes: MIN_DURATION_MINUTES});

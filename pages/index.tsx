@@ -11,7 +11,7 @@ const DATES = [
   new Date('2021-07-25'),
 ];
 
-export default function Home(): React.ReactElement {
+export default function Home() {
   const [partySize, setPartySize] = useState<number | null>(null);
   const defaultDate = DATES.find((d) => isSameDay(d, new Date())) ?? DATES[0];
   const [startTime, setStartTime] = useState(defaultDate);

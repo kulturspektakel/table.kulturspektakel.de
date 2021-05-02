@@ -10,11 +10,7 @@ import {
 import Head from 'next/head';
 import Link from 'next/link';
 
-export default function Slot({
-  children,
-}: {
-  children: React.ReactNode;
-}): React.ReactElement {
+export default function Slot({children}: {children: React.ReactNode}) {
   return (
     <Container maxW="container.md" pt="10" pb="20">
       <Head>

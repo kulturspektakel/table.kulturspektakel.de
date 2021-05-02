@@ -39,10 +39,7 @@ gql`
 
 export const STEP_MINUTES = 30;
 
-export default function Slots(props: {
-  day: Date;
-  partySize: number;
-}): React.ReactElement {
+export default function Slots(props: {day: Date; partySize: number}) {
   const {data} = useSlotsQuery({
     variables: {
       partySize: props.partySize,

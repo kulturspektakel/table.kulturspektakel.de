@@ -6,7 +6,7 @@ export default function useSticky(props: {
     ref: React.LegacyRef<HTMLDivElement>,
     style: CSSProperties,
   ) => React.ReactElement;
-}): React.ReactElement {
+}) {
   const [isSticky, setIsSticky] = useState(false);
   const [rect, setRect] = useState<DOMRect>();
   const [ref, setRef] = useState<HTMLDivElement | null>();

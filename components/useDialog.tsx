@@ -23,7 +23,7 @@ export default function useDialog(props: {
   closeButton?: string;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
-}): React.ReactElement {
+}) {
   const onClose = () => props.setIsOpen(false);
   const cancelRef = React.useRef(null);
 

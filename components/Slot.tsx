@@ -30,8 +30,8 @@ export function SlotLink({
     displayName: string;
   };
   partySize: number;
-  children: React.ReactNode;
-}): React.ReactNode {
+  children: JSX.Element;
+}) {
   if (!endTime) {
     return children;
   }
@@ -66,9 +66,9 @@ export function SlotPopover({
   children,
   band,
 }: {
-  children: React.ReactNode;
+  children: JSX.Element;
   band?: BandPopoverFragment;
-}): React.ReactNode {
+}) {
   const [small, touch] = useMediaQuery([
     '(max-width: 500px)',
     '(pointer: coarse)',
@@ -125,7 +125,7 @@ export function SlotContent({
   time: Date;
   available: boolean;
   open: boolean;
-}): React.ReactElement {
+}) {
   return (
     <Center
       h="40px"

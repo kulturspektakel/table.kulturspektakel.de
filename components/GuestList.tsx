@@ -30,7 +30,7 @@ export default function useGuestListMutation({
   token: string;
   maxCapacity: number;
   initialOtherPersons: string[];
-}): React.ReactElement {
+}) {
   const [isDirty, setIsDirty] = useState(false);
   useEffect(() => setOtherPersons(initialOtherPersons), [initialOtherPersons]);
   const [otherPersons, setOtherPersons] = useState(initialOtherPersons);

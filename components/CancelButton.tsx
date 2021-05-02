@@ -12,9 +12,7 @@ gql`
   }
 `;
 
-export default function CancelButton(props: {
-  token: string;
-}): React.ReactElement {
+export default function CancelButton(props: {token: string}) {
   const [save, {loading, error}] = useCancelReservationMutation({
     errorPolicy: 'ignore',
   });

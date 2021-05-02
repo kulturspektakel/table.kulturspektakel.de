@@ -3,9 +3,7 @@ import React, {useEffect} from 'react';
 import {ApolloError} from '@apollo/client';
 import useDialog from './useDialog';
 
-export default function useErrorDialog(
-  error: ApolloError | undefined,
-): React.ReactElement {
+export default function useErrorDialog(error: ApolloError | undefined) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const dialog = useDialog({
