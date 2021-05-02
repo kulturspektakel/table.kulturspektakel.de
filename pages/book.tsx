@@ -61,7 +61,7 @@ export default function Booking({
   const startTime = new Date(s);
   const maxEndTime = new Date(e);
   const earliestEnd = add(startTime, {minutes: MIN_DURATION_MINUTES});
-  const [endTime, setEndTime] = useState(earliestEnd);
+  const [endTime, setEndTime] = useState<Date | null>(null);
   const [primaryPerson, setPrimaryPerson] = useState('');
   const [primaryEmail, setPrimaryEmail] = useState('');
   const [otherPersons, setOtherPersons] = useState<string[]>(
@@ -70,7 +70,8 @@ export default function Booking({
   const [requestReservation, {loading, error, data}] = useRequestMutation({
     variables: {
       areaId,
-      endTime,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      endTime: endTime!,
       otherPersons,
       primaryEmail,
       primaryPerson,
@@ -95,7 +96,7 @@ export default function Booking({
     ) + 1;
 
   const submitDisabled =
-    !primaryPerson || !primaryEmail || otherPersons.some((p) => !p);
+    !endTime || !primaryPerson || !primaryEmail || otherPersons.some((p) => !p);
 
   return (
     <Page>
@@ -136,22 +137,32 @@ export default function Booking({
                     renderTime(maxEndTime)
                   ) : (
                     <Select
-                      fontWeight="semibold"
                       backgroundColor="white"
-                      value={formatISO(endTime)}
+                      value={endTime ? formatISO(endTime) : 'null'}
                       onChange={(e) => setEndTime(parseISO(e.target.value))}
+                      color={endTime == null ? 'gray.400' : undefined}
                     >
+                      {endTime == null && (
+                        <option
+                          value="null"
+                          disabled
+                          selected={endTime == null}
+                          style={{color: '#A0AEC0'}}
+                        >
+                          bitte auswählen...
+                        </option>
+                      )}
                       {Array.from(Array(steps)).map((_, i) => {
                         const date = add(earliestEnd, {
                           minutes: i * STEP_MINUTES,
                         });
                         return (
-                          <option key={i} value={formatISO(date)}>
-                            {renderTime(date)} (
-                            {(
-                              differenceInMinutes(date, startTime) / 60
-                            ).toLocaleString('de')}{' '}
-                            Stunden)
+                          <option
+                            key={i}
+                            value={formatISO(date)}
+                            style={{color: 'black'}}
+                          >
+                            {renderTime(date)}
                           </option>
                         );
                       })}

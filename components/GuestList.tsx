@@ -26,10 +26,12 @@ export default function useGuestListMutation({
   token,
   maxCapacity,
   initialOtherPersons,
+  canEdit,
 }: {
   token: string;
   maxCapacity: number;
   initialOtherPersons: string[];
+  canEdit: boolean;
 }) {
   const [isDirty, setIsDirty] = useState(false);
   useEffect(() => setOtherPersons(initialOtherPersons), [initialOtherPersons]);
@@ -53,13 +55,14 @@ export default function useGuestListMutation({
   );
   const errorDialog = useErrorDialog(error);
 
-  const rows = Math.min((maxCapacity ?? 1) - 1, otherPersons.length + 1);
+  const guestRows = otherPersons.length + (canEdit ? 1 : 0);
+  const rows = Math.min((maxCapacity ?? 1) - 1, guestRows);
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!loading) {
+        if (!loading && canEdit) {
           save({
             variables: {
               otherPersons,
@@ -83,19 +86,23 @@ export default function useGuestListMutation({
               placeholder={`Gast ${i + 2}/${maxCapacity}`}
               value={otherPersons[i] ?? ''}
               onChange={(e) => callback(i, e.target.value)}
+              disabled={!canEdit}
+              style={{opacity: 1}}
             />
-            <InputRightElement>
-              <IconButton
-                size="sm"
-                aria-label="Löschen"
-                icon={<CloseIcon />}
-                onClick={() => callback(i, null)}
-              />
-            </InputRightElement>
+            {canEdit && (
+              <InputRightElement>
+                <IconButton
+                  size="sm"
+                  aria-label="Löschen"
+                  icon={<CloseIcon />}
+                  onClick={() => callback(i, null)}
+                />
+              </InputRightElement>
+            )}
           </InputGroup>
         ))}
       </VStack>
-      {isDirty && (
+      {canEdit && isDirty && (
         <Button
           size="sm"
           colorScheme="blue"
@@ -106,19 +113,22 @@ export default function useGuestListMutation({
           Speichern
         </Button>
       )}
-      <Text
-        visibility={
-          maxCapacity > otherPersons.length + 1 ? 'visible' : 'hidden'
-        }
-        fontWeight="normal"
-        fontSize="sm"
-        mt="3"
-        color="gray.600"
-        maxW="500px"
-      >
-        Am Tisch, den wir für dich reserviert haben, können bis zu {maxCapacity}
-        &nbsp;Personen sitzen. Du kannst noch weitere Gäste eintragen.
-      </Text>
+      {canEdit && (
+        <Text
+          visibility={
+            maxCapacity > otherPersons.length + 1 ? 'visible' : 'hidden'
+          }
+          fontWeight="normal"
+          fontSize="sm"
+          mt="3"
+          color="gray.600"
+          maxW="500px"
+        >
+          Am Tisch, den wir für dich reserviert haben, können bis zu{' '}
+          {maxCapacity}
+          &nbsp;Personen sitzen. Du kannst noch weitere Gäste eintragen.
+        </Text>
+      )}
     </form>
   );
 }

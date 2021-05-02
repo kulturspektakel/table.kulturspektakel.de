@@ -28,8 +28,9 @@ export type Area = Node & {
   id: Scalars['ID'];
   displayName: Scalars['String'];
   table: Array<Table>;
+  maxCapacity: Scalars['Int'];
   openingHour: Array<Availability>;
-  reservations: Array<Reservation>;
+  currentCapacity: Scalars['Int'];
   availability: Array<Availability>;
   bandsPlaying: Array<Band>;
 };
@@ -42,10 +43,6 @@ export type AreaTableArgs = {
 };
 
 export type AreaOpeningHourArgs = {
-  day?: Maybe<Scalars['Date']>;
-};
-
-export type AreaReservationsArgs = {
   day?: Maybe<Scalars['Date']>;
 };
 
@@ -80,6 +77,7 @@ export type Mutation = {
   confirmReservation?: Maybe<Reservation>;
   requestReservation: Scalars['Boolean'];
   updateReservation?: Maybe<Reservation>;
+  checkInReservation?: Maybe<Reservation>;
   createOrder?: Maybe<Order>;
 };
 
@@ -103,6 +101,11 @@ export type MutationRequestReservationArgs = {
 export type MutationUpdateReservationArgs = {
   token: Scalars['String'];
   otherPersons: Array<Scalars['String']>;
+};
+
+export type MutationCheckInReservationArgs = {
+  id: Scalars['Int'];
+  checkedInPersons: Scalars['Int'];
 };
 
 export type MutationCreateOrderArgs = {
@@ -236,6 +239,11 @@ export type Table = {
   displayName: Scalars['String'];
   maxCapacity: Scalars['Int'];
   area: Area;
+  reservations: Array<Reservation>;
+};
+
+export type TableReservationsArgs = {
+  day?: Maybe<Scalars['Date']>;
 };
 
 export type TableAreaIdDisplayNameCompoundUniqueInput = {

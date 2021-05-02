@@ -50,12 +50,12 @@ export default function Home() {
             onChange={(e) => setPartySize(parseInt(e.target.value, 10))}
           >
             {partySize == null && (
-              <option disabled value="null">
+              <option disabled value="null" style={{color: '#A0AEC0'}}>
                 Personenzahl
               </option>
             )}
             {Array.from(Array(9)).map((_, i) => (
-              <option key={i} value={i + 2}>
+              <option key={i} value={i + 2} style={{color: 'black'}}>
                 {i + 2} Personen
               </option>
             ))}

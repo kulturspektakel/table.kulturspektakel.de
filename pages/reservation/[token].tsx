@@ -70,7 +70,7 @@ gql`
 const RESERVATION_STATUS: Record<ReservationStatus, string> = {
   [ReservationStatus.Confirmed]: 'Bestätigt',
   [ReservationStatus.Pending]: 'Unbestätigt',
-  [ReservationStatus.CheckedIn]: 'Eingechekt',
+  [ReservationStatus.CheckedIn]: 'Eingecheckt',
   [ReservationStatus.Cleared]: 'abgesagt',
 };
 
@@ -192,6 +192,7 @@ export default function Reservations() {
                       maxCapacity={reservation.table.maxCapacity}
                       initialOtherPersons={reservation.otherPersons}
                       token={reservation.token}
+                      canEdit={reservation.status === 'Confirmed'}
                     />
                   </Td>
                 </Tr>
@@ -213,7 +214,9 @@ export default function Reservations() {
                 </a>
               </Link>
               <Spacer />
-              <CancelButton token={reservation.token} />
+              {reservation.status === 'Confirmed' && (
+                <CancelButton token={reservation.token} />
+              )}
             </HStack>
           </Box>
           {reservation.reservationsFromSamePerson.length > 0 && (
