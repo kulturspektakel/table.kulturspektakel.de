@@ -10,15 +10,29 @@ import {
   Box,
   Input,
   VStack,
+  Heading,
 } from '@chakra-ui/react';
-import {differenceInMinutes, add, formatISO, parseISO} from 'date-fns';
+import {
+  differenceInMinutes,
+  add,
+  formatISO,
+  parseISO,
+  max,
+  isAfter,
+  isBefore,
+} from 'date-fns';
 import {GetServerSideProps} from 'next';
 import {useRouter} from 'next/router';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Page from '../components/Page';
 import {STEP_MINUTES} from '../components/Slots';
+import TableTypeSelector from '../components/TableTypeSelector';
 import useErrorDialog from '../components/useErrorDialog';
-import {useRequestMutation} from '../types/graphql';
+import {
+  useRequestMutation,
+  useAreaNameQuery,
+  TableType,
+} from '../types/graphql';
 
 const MIN_DURATION_MINUTES = 90;
 const MAX_DURATION_MINUTES = 240;
@@ -31,6 +45,7 @@ gql`
     $primaryPerson: String!
     $primaryEmail: String!
     $otherPersons: [String!]!
+    $tableType: TableType
   ) {
     requestReservation(
       areaId: $areaId
@@ -39,35 +54,66 @@ gql`
       primaryPerson: $primaryPerson
       primaryEmail: $primaryEmail
       otherPersons: $otherPersons
+      tableType: $tableType
     )
+  }
+`;
+
+gql`
+  query AreaName($id: ID!, $day: Date!, $partySize: Int!) {
+    node(id: $id) {
+      ... on Area {
+        displayName
+        availability(day: $day, partySize: $partySize) {
+          startTime
+          endTime
+          tableType
+        }
+      }
+    }
   }
 `;
 
 export type Props = {
   startTime: number;
-  endTime: number;
   partySize: number;
   areaId: string;
-  area: string;
 };
 
-export default function Booking({
-  startTime: s,
-  endTime: e,
-  partySize,
-  areaId,
-  area,
-}: Props) {
+export default function Booking({startTime: s, partySize, areaId}: Props) {
+  const startTimeDate = useRef(new Date(s));
+
+  const {data} = useAreaNameQuery({
+    variables: {
+      id: `Area:${areaId}`,
+      partySize,
+      day: startTimeDate.current,
+    },
+  });
+
   const startTime = new Date(s);
-  const maxEndTime = new Date(e);
   const earliestEnd = add(startTime, {minutes: MIN_DURATION_MINUTES});
+  const availability =
+    data?.node?.availability.filter(
+      ({startTime: s, endTime}) =>
+        !isAfter(s, startTime) && !isBefore(endTime, earliestEnd),
+    ) ?? [];
+  const maxEndTime =
+    availability.length > 0
+      ? max(availability.map(({endTime}) => endTime))
+      : startTime;
+
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [primaryPerson, setPrimaryPerson] = useState('');
   const [primaryEmail, setPrimaryEmail] = useState('');
+  const [prefersIsland, setPrefersIsland] = useState<boolean | null>(null);
   const [otherPersons, setOtherPersons] = useState<string[]>(
     Array.from(Array(partySize - 1)).map(() => ''),
   );
-  const [requestReservation, {loading, error, data}] = useRequestMutation({
+  const [
+    requestReservation,
+    {loading, error, data: requestData},
+  ] = useRequestMutation({
     variables: {
       areaId,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -76,16 +122,18 @@ export default function Booking({
       primaryEmail,
       primaryPerson,
       startTime,
+      tableType: prefersIsland ? TableType.Island : undefined,
     },
     errorPolicy: 'all',
   });
+
   const errorDialog = useErrorDialog(error);
   const router = useRouter();
   useEffect(() => {
-    if (data?.requestReservation) {
+    if (requestData?.requestReservation) {
       router.push('/confirm');
     }
-  }, [data, router]);
+  }, [requestData, router]);
 
   const steps =
     Math.floor(
@@ -95,11 +143,20 @@ export default function Booking({
       ) / STEP_MINUTES,
     ) + 1;
 
+  const hasTableTypeChoice =
+    areaId === 'gb' &&
+    availability.some(({tableType}) => tableType === TableType.Island) &&
+    availability.some(({tableType}) => tableType !== TableType.Island);
+
   const submitDisabled =
-    !endTime || !primaryPerson || !primaryEmail || otherPersons.some((p) => !p);
+    !endTime ||
+    !primaryPerson ||
+    !primaryEmail ||
+    otherPersons.some((p) => !p) ||
+    (hasTableTypeChoice && prefersIsland == null);
 
   return (
-    <Page>
+    <Page loading={data?.node == null || availability.length === 0}>
       {errorDialog}
       <Box boxShadow="sm" bg="white" borderRadius="md">
         <form
@@ -146,7 +203,6 @@ export default function Booking({
                         <option
                           value="null"
                           disabled
-                          selected={endTime == null}
                           style={{color: '#A0AEC0'}}
                         >
                           bitte auswählen...
@@ -174,7 +230,7 @@ export default function Booking({
                 <Th minH="64px" pr="0" isNumeric>
                   Bereich
                 </Th>
-                <Td fontWeight="semibold">{area}</Td>
+                <Td fontWeight="semibold">{data?.node?.displayName ?? ''}</Td>
               </Tr>
               <Tr>
                 <Th pr="0" isNumeric>
@@ -183,7 +239,7 @@ export default function Booking({
                 <Td fontWeight="semibold">
                   <Input
                     autoComplete="name"
-                    placeholder="Deine Name"
+                    placeholder="Dein Name"
                     onChange={(e) => setPrimaryPerson(e.target.value)}
                   />
                 </Td>
@@ -202,7 +258,9 @@ export default function Booking({
                 </Td>
               </Tr>
               <Tr>
-                <Th pr="0" pt="6" verticalAlign="top" isNumeric>
+                <Th pr="0" pt="5" verticalAlign="top" isNumeric>
+                  Weitere
+                  <br />
                   Gäste
                 </Th>
                 <Td fontWeight="semibold">
@@ -211,7 +269,7 @@ export default function Booking({
                       <Input
                         key={i}
                         autoComplete="off"
-                        placeholder="Name"
+                        placeholder={`Name Gast ${i + 1}`}
                         onChange={(e) => {
                           const newPersons = [...otherPersons];
                           newPersons[i] = e.target.value;
@@ -222,6 +280,22 @@ export default function Booking({
                   </VStack>
                 </Td>
               </Tr>
+              {hasTableTypeChoice && (
+                <Tr>
+                  <Td colSpan={2}>
+                    <Heading
+                      size="xs"
+                      mb="2"
+                      textTransform="uppercase"
+                      letterSpacing="wider"
+                      color="gray.600"
+                    >
+                      Sitzplatz
+                    </Heading>
+                    <TableTypeSelector onChange={setPrefersIsland} />
+                  </Td>
+                </Tr>
+              )}
             </Tbody>
           </Table>
           <Box p="5">
@@ -254,8 +328,8 @@ function renderTime(date: Date): string {
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context,
 ) => {
-  const {startTime, endTime, partySize, areaId, area} = context.query;
-  if (!startTime || !endTime || !partySize || !areaId || !area) {
+  const {startTime, partySize, areaId} = context.query;
+  if (!startTime || !partySize || !areaId) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const props: any = undefined;
     return {
@@ -269,10 +343,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   return {
     props: {
       startTime: parseInt(String(startTime), 10),
-      endTime: parseInt(String(endTime), 10),
       partySize: parseInt(String(partySize), 10),
       areaId: String(areaId),
-      area: String(area),
     },
   };
 };

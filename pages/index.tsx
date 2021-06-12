@@ -19,6 +19,19 @@ export default function Home() {
   return (
     <Page>
       <VStack spacing="10">
+        <VStack>
+          <Text>
+            Um das Kult zu besuchen braucht ihr dieses Jahr einen festen
+            Sitzplatz. In Gruppen von bis zu zehn Personen könnt ihr euch in
+            unseren verschiedenen Bereichen Plätze reservieren. Ein spontaner
+            Besuch ist auch möglich sofern noch Plätze frei sind.
+          </Text>
+          <Text>
+            Eure Reservierung ist nur für den ausgewählten Zeitraum und Bereich
+            gültig, aber es ist möglich mehrere Reservierungen zu machen.
+          </Text>
+        </VStack>
+
         <Stack spacing={['3', '10']} direction={['column', 'row']} width="100%">
           <Select
             fontWeight="semibold"

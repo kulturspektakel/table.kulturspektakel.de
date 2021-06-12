@@ -38,10 +38,8 @@ export function SlotLink({
 
   const query: Props = {
     startTime: startTime.getTime(),
-    endTime: endTime.getTime(),
     partySize,
     areaId: area.id,
-    area: area.displayName,
   };
   return (
     <Link

@@ -17,6 +17,8 @@ import {
   VStack,
   Button,
   Input,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 import {gql} from '@apollo/client';
 import {
@@ -156,6 +158,11 @@ export default function Reservations() {
                       timeZone: 'Europe/Berlin',
                     })}{' '}
                     Uhr
+                    <Alert status="warning">
+                      <AlertIcon />
+                      Bitte seid pünktlich zum Beginn eurer Reservierung da,
+                      sonst verfällt sie.
+                    </Alert>
                   </Td>
                 </Tr>
                 <Tr>

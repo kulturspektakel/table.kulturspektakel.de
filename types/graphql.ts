@@ -28,10 +28,9 @@ export type Area = Node & {
   id: Scalars['ID'];
   displayName: Scalars['String'];
   table: Array<Table>;
-  maxCapacity: Scalars['Int'];
-  openingHour: Array<Availability>;
+  openingHour: Array<OpeningHour>;
   currentCapacity: Scalars['Int'];
-  availability: Array<Availability>;
+  availability: Array<TableAvailability>;
   bandsPlaying: Array<Band>;
 };
 
@@ -55,15 +54,9 @@ export type AreaBandsPlayingArgs = {
   day: Scalars['Date'];
 };
 
-export type Availability = {
-  __typename?: 'Availability';
-  startTime: Scalars['DateTime'];
-  endTime: Scalars['DateTime'];
-};
-
 export type Band = {
   __typename?: 'Band';
-  id: Scalars['Int'];
+  id: Scalars['ID'];
   name: Scalars['String'];
   genre?: Maybe<Scalars['String']>;
   startTime: Scalars['DateTime'];
@@ -96,6 +89,7 @@ export type MutationRequestReservationArgs = {
   startTime: Scalars['DateTime'];
   endTime: Scalars['DateTime'];
   areaId: Scalars['ID'];
+  tableType?: Maybe<TableType>;
 };
 
 export type MutationUpdateReservationArgs = {
@@ -117,6 +111,12 @@ export type MutationCreateOrderArgs = {
 export type Node = {
   /** Unique identifier for the resource */
   id: Scalars['ID'];
+};
+
+export type OpeningHour = {
+  __typename?: 'OpeningHour';
+  startTime: Scalars['DateTime'];
+  endTime: Scalars['DateTime'];
 };
 
 export type Order = {
@@ -180,14 +180,8 @@ export type ProductListProductOrderByInput = {
   order?: Maybe<SortOrder>;
 };
 
-export type ProductProductListIdOrderCompoundUniqueInput = {
-  productListId: Scalars['Int'];
-  order: Scalars['Int'];
-};
-
 export type ProductWhereUniqueInput = {
   id?: Maybe<Scalars['Int']>;
-  productListId_order?: Maybe<ProductProductListIdOrderCompoundUniqueInput>;
 };
 
 export type Query = {
@@ -218,6 +212,7 @@ export type Reservation = {
   endTime: Scalars['DateTime'];
   primaryPerson: Scalars['String'];
   otherPersons: Array<Scalars['String']>;
+  checkedInPersons: Scalars['Int'];
   reservationsFromSamePerson: Array<Reservation>;
 };
 
@@ -238,6 +233,7 @@ export type Table = {
   id: Scalars['String'];
   displayName: Scalars['String'];
   maxCapacity: Scalars['Int'];
+  type: TableType;
   area: Area;
   reservations: Array<Reservation>;
 };
@@ -250,6 +246,19 @@ export type TableAreaIdDisplayNameCompoundUniqueInput = {
   areaId: Scalars['String'];
   displayName: Scalars['String'];
 };
+
+export type TableAvailability = {
+  __typename?: 'TableAvailability';
+  startTime: Scalars['DateTime'];
+  endTime: Scalars['DateTime'];
+  tableType: TableType;
+};
+
+export enum TableType {
+  BeerTable = 'BEER_TABLE',
+  BistroTable = 'BISTRO_TABLE',
+  Island = 'ISLAND',
+}
 
 export type TableWhereUniqueInput = {
   id?: Maybe<Scalars['String']>;
@@ -297,14 +306,14 @@ export type SlotsQuery = {__typename?: 'Query'} & {
   areas: Array<
     {__typename?: 'Area'} & Pick<Area, 'id' | 'displayName'> & {
         openingHour: Array<
-          {__typename?: 'Availability'} & Pick<
-            Availability,
+          {__typename?: 'OpeningHour'} & Pick<
+            OpeningHour,
             'startTime' | 'endTime'
           >
         >;
         availability: Array<
-          {__typename?: 'Availability'} & Pick<
-            Availability,
+          {__typename?: 'TableAvailability'} & Pick<
+            TableAvailability,
             'startTime' | 'endTime'
           >
         >;
@@ -323,12 +332,32 @@ export type RequestMutationVariables = Exact<{
   primaryPerson: Scalars['String'];
   primaryEmail: Scalars['String'];
   otherPersons: Array<Scalars['String']> | Scalars['String'];
+  tableType?: Maybe<TableType>;
 }>;
 
 export type RequestMutation = {__typename?: 'Mutation'} & Pick<
   Mutation,
   'requestReservation'
 >;
+
+export type AreaNameQueryVariables = Exact<{
+  id: Scalars['ID'];
+  day: Scalars['Date'];
+  partySize: Scalars['Int'];
+}>;
+
+export type AreaNameQuery = {__typename?: 'Query'} & {
+  node?: Maybe<
+    {__typename?: 'Area'} & Pick<Area, 'displayName'> & {
+        availability: Array<
+          {__typename?: 'TableAvailability'} & Pick<
+            TableAvailability,
+            'startTime' | 'endTime' | 'tableType'
+          >
+        >;
+      }
+  >;
+};
 
 export type ReservationQueryVariables = Exact<{
   token: Scalars['String'];
@@ -424,7 +453,8 @@ export function useCancelReservationMutation(
 export type CancelReservationMutationHookResult = ReturnType<
   typeof useCancelReservationMutation
 >;
-export type CancelReservationMutationResult = Apollo.MutationResult<CancelReservationMutation>;
+export type CancelReservationMutationResult =
+  Apollo.MutationResult<CancelReservationMutation>;
 export type CancelReservationMutationOptions = Apollo.BaseMutationOptions<
   CancelReservationMutation,
   CancelReservationMutationVariables
@@ -475,7 +505,8 @@ export function useUpdateReservationMutation(
 export type UpdateReservationMutationHookResult = ReturnType<
   typeof useUpdateReservationMutation
 >;
-export type UpdateReservationMutationResult = Apollo.MutationResult<UpdateReservationMutation>;
+export type UpdateReservationMutationResult =
+  Apollo.MutationResult<UpdateReservationMutation>;
 export type UpdateReservationMutationOptions = Apollo.BaseMutationOptions<
   UpdateReservationMutation,
   UpdateReservationMutationVariables
@@ -552,6 +583,7 @@ export const RequestDocument = gql`
     $primaryPerson: String!
     $primaryEmail: String!
     $otherPersons: [String!]!
+    $tableType: TableType
   ) {
     requestReservation(
       areaId: $areaId
@@ -560,6 +592,7 @@ export const RequestDocument = gql`
       primaryPerson: $primaryPerson
       primaryEmail: $primaryEmail
       otherPersons: $otherPersons
+      tableType: $tableType
     )
   }
 `;
@@ -587,6 +620,7 @@ export type RequestMutationFn = Apollo.MutationFunction<
  *      primaryPerson: // value for 'primaryPerson'
  *      primaryEmail: // value for 'primaryEmail'
  *      otherPersons: // value for 'otherPersons'
+ *      tableType: // value for 'tableType'
  *   },
  * });
  */
@@ -607,6 +641,68 @@ export type RequestMutationResult = Apollo.MutationResult<RequestMutation>;
 export type RequestMutationOptions = Apollo.BaseMutationOptions<
   RequestMutation,
   RequestMutationVariables
+>;
+export const AreaNameDocument = gql`
+  query AreaName($id: ID!, $day: Date!, $partySize: Int!) {
+    node(id: $id) {
+      ... on Area {
+        displayName
+        availability(day: $day, partySize: $partySize) {
+          startTime
+          endTime
+          tableType
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * __useAreaNameQuery__
+ *
+ * To run a query within a React component, call `useAreaNameQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAreaNameQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAreaNameQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      day: // value for 'day'
+ *      partySize: // value for 'partySize'
+ *   },
+ * });
+ */
+export function useAreaNameQuery(
+  baseOptions: Apollo.QueryHookOptions<AreaNameQuery, AreaNameQueryVariables>,
+) {
+  const options = {...defaultOptions, ...baseOptions};
+  return Apollo.useQuery<AreaNameQuery, AreaNameQueryVariables>(
+    AreaNameDocument,
+    options,
+  );
+}
+export function useAreaNameLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    AreaNameQuery,
+    AreaNameQueryVariables
+  >,
+) {
+  const options = {...defaultOptions, ...baseOptions};
+  return Apollo.useLazyQuery<AreaNameQuery, AreaNameQueryVariables>(
+    AreaNameDocument,
+    options,
+  );
+}
+export type AreaNameQueryHookResult = ReturnType<typeof useAreaNameQuery>;
+export type AreaNameLazyQueryHookResult = ReturnType<
+  typeof useAreaNameLazyQuery
+>;
+export type AreaNameQueryResult = Apollo.QueryResult<
+  AreaNameQuery,
+  AreaNameQueryVariables
 >;
 export const ReservationDocument = gql`
   query Reservation($token: String!) {
@@ -731,7 +827,8 @@ export function useConfimReservationMutation(
 export type ConfimReservationMutationHookResult = ReturnType<
   typeof useConfimReservationMutation
 >;
-export type ConfimReservationMutationResult = Apollo.MutationResult<ConfimReservationMutation>;
+export type ConfimReservationMutationResult =
+  Apollo.MutationResult<ConfimReservationMutation>;
 export type ConfimReservationMutationOptions = Apollo.BaseMutationOptions<
   ConfimReservationMutation,
   ConfimReservationMutationVariables

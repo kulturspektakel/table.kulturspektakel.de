@@ -95,18 +95,6 @@
             "deprecationReason": null
           },
           {
-            "name": "maxCapacity",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {"kind": "SCALAR", "name": "Int", "ofType": null}
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "openingHour",
             "description": null,
             "args": [
@@ -130,7 +118,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "Availability",
+                    "name": "OpeningHour",
                     "ofType": null
                   }
                 }
@@ -191,7 +179,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "Availability",
+                    "name": "TableAvailability",
                     "ofType": null
                   }
                 }
@@ -271,41 +259,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "Availability",
-        "description": null,
-        "fields": [
-          {
-            "name": "startTime",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {"kind": "SCALAR", "name": "DateTime", "ofType": null}
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "endTime",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {"kind": "SCALAR", "name": "DateTime", "ofType": null}
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "Band",
         "description": null,
         "fields": [
@@ -316,7 +269,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": {"kind": "SCALAR", "name": "Int", "ofType": null}
+              "ofType": {"kind": "SCALAR", "name": "ID", "ofType": null}
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -551,6 +504,14 @@
                 "defaultValue": null,
                 "isDeprecated": false,
                 "deprecationReason": null
+              },
+              {
+                "name": "tableType",
+                "description": null,
+                "type": {"kind": "ENUM", "name": "TableType", "ofType": null},
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
               }
             ],
             "type": {
@@ -738,6 +699,41 @@
         "interfaces": [],
         "enumValues": null,
         "possibleTypes": [{"kind": "OBJECT", "name": "Area", "ofType": null}]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OpeningHour",
+        "description": null,
+        "fields": [
+          {
+            "name": "startTime",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {"kind": "SCALAR", "name": "DateTime", "ofType": null}
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "endTime",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {"kind": "SCALAR", "name": "DateTime", "ofType": null}
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
       },
       {
         "kind": "OBJECT",
@@ -1179,41 +1175,6 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "ProductProductListIdOrderCompoundUniqueInput",
-        "description": null,
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "productListId",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {"kind": "SCALAR", "name": "Int", "ofType": null}
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "order",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {"kind": "SCALAR", "name": "Int", "ofType": null}
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
         "name": "ProductWhereUniqueInput",
         "description": null,
         "fields": null,
@@ -1222,18 +1183,6 @@
             "name": "id",
             "description": null,
             "type": {"kind": "SCALAR", "name": "Int", "ofType": null},
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "productListId_order",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "ProductProductListIdOrderCompoundUniqueInput",
-              "ofType": null
-            },
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -1482,6 +1431,18 @@
             "deprecationReason": null
           },
           {
+            "name": "checkedInPersons",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {"kind": "SCALAR", "name": "Int", "ofType": null}
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "reservationsFromSamePerson",
             "description": null,
             "args": [],
@@ -1611,6 +1572,18 @@
             "deprecationReason": null
           },
           {
+            "name": "type",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {"kind": "ENUM", "name": "TableType", "ofType": null}
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "area",
             "description": null,
             "args": [],
@@ -1694,6 +1667,82 @@
         ],
         "interfaces": null,
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TableAvailability",
+        "description": null,
+        "fields": [
+          {
+            "name": "startTime",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {"kind": "SCALAR", "name": "DateTime", "ofType": null}
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "endTime",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {"kind": "SCALAR", "name": "DateTime", "ofType": null}
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "tableType",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {"kind": "ENUM", "name": "TableType", "ofType": null}
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "TableType",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "BEER_TABLE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "BISTRO_TABLE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ISLAND",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {

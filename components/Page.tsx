@@ -1,16 +1,24 @@
 import React from 'react';
 import {
   Box,
+  Center,
   Container,
   Divider,
   Heading,
   HStack,
   Spacer,
+  Spinner,
 } from '@chakra-ui/react';
 import Head from 'next/head';
 import Link from 'next/link';
 
-export default function Slot({children}: {children: React.ReactNode}) {
+export default function Page({
+  children,
+  loading,
+}: {
+  children: React.ReactNode;
+  loading?: boolean;
+}) {
   return (
     <Container maxW="container.md" pt="10" pb="20">
       <Head>
@@ -26,7 +34,13 @@ export default function Slot({children}: {children: React.ReactNode}) {
         </Link>
       </HStack>
       <Divider mb="5" />
-      {children}
+      {loading ? (
+        <Center h="200px">
+          <Spinner />
+        </Center>
+      ) : (
+        children
+      )}
     </Container>
   );
 }

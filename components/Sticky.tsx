@@ -11,13 +11,9 @@ export default function useSticky(props: {
   const [rect, setRect] = useState<DOMRect>();
   const [ref, setRef] = useState<HTMLDivElement | null>();
 
-  const refCb = useCallback(
-    (node: HTMLDivElement | null) => {
-      console.log('node', node);
-      setRef(node);
-    },
-    [setRef],
-  );
+  const refCb = useCallback((node: HTMLDivElement | null) => setRef(node), [
+    setRef,
+  ]);
 
   const onChange = useCallback(
     (visible: boolean) => {
