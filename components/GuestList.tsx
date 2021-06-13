@@ -124,7 +124,7 @@ export default function useGuestListMutation({
           color="gray.600"
           maxW="500px"
         >
-          Am Tisch, den wir für dich reserviert haben, können bis zu{' '}
+          Am Platz, den wir für dich reserviert haben, können bis zu{' '}
           {maxCapacity}
           &nbsp;Personen sitzen. Du kannst noch weitere Gäste eintragen.
         </Text>

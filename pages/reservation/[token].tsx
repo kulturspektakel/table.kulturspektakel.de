@@ -17,8 +17,9 @@ import {
   VStack,
   Button,
   Input,
-  Alert,
-  AlertIcon,
+  Link as ChakraLink,
+  UnorderedList,
+  ListItem,
 } from '@chakra-ui/react';
 import {gql} from '@apollo/client';
 import {
@@ -124,6 +125,46 @@ export default function Reservations() {
           <Heading size="md" textAlign="center">
             Reservierung #{reservation.id}
           </Heading>
+          <Box boxShadow="sm" bgColor="white" borderRadius="lg" p="5">
+            <Heading size="sm" mb="1">
+              Wichtige Informationen
+            </Heading>
+            <UnorderedList spacing={1} pl="2">
+              <ListItem>
+                Der Zugang zum Festival ist ausschließlich über einen der{' '}
+                <ChakraLink
+                  color="red.500"
+                  fontWeight="semibold"
+                  isExternal
+                  href="https://kulturspektakel.de/angebot"
+                >
+                  beiden Eingänge
+                </ChakraLink>{' '}
+                möglich.
+              </ListItem>
+              <ListItem>
+                Bitte seid pünktlich zum Beginn eurer Reservierung da, sonst
+                verfällt sie.
+              </ListItem>
+              <ListItem>
+                Zur Kontaktverfolgung bitten wir euch die{' '}
+                <ChakraLink
+                  href="https://www.coronawarn.app/"
+                  color="red.500"
+                  fontWeight="semibold"
+                  isExternal
+                >
+                  Corona-Warn-App
+                </ChakraLink>{' '}
+                zu installieren.
+              </ListItem>
+              <ListItem>
+                Außer auf den Wegen zu den Verkaufsständen und Toiletten dürft
+                ihr euch nur an eurem Sitzplatz aufhalten und nicht an andere
+                Tische wechseln.
+              </ListItem>
+            </UnorderedList>
+          </Box>
           <Box boxShadow="sm" bgColor="white" borderRadius="lg">
             <Table size="md">
               <Tbody>
@@ -158,11 +199,6 @@ export default function Reservations() {
                       timeZone: 'Europe/Berlin',
                     })}{' '}
                     Uhr
-                    <Alert status="warning">
-                      <AlertIcon />
-                      Bitte seid pünktlich zum Beginn eurer Reservierung da,
-                      sonst verfällt sie.
-                    </Alert>
                   </Td>
                 </Tr>
                 <Tr>

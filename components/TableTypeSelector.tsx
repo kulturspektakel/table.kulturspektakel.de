@@ -6,6 +6,7 @@ import {
   Text,
   Heading,
   UseRadioProps,
+  Circle,
 } from '@chakra-ui/react';
 import React from 'react';
 
@@ -35,7 +36,7 @@ export default function TableTypeSelector(props: {
       />
       <TableTypeOption
         title="Sitzgruppe"
-        description="Gemütliche Sitz&shy;gruppe mit Sofas direkt an der Bühne"
+        description="Gemütliche Sitz&shy;gruppe mit Sofas direkt an der Bühne."
         disabled={false}
         {...getRadioProps({value: 'ISLAND'})}
       />
@@ -64,6 +65,7 @@ function TableTypeOption({
         borderWidth="2px"
         borderRadius="md"
         color="GrayText"
+        h="100%"
         _checked={{
           borderColor: 'blue.500',
           color: 'HighlightText',
@@ -73,8 +75,21 @@ function TableTypeOption({
         }}
         p="3"
       >
-        <Heading size="sm">{title}</Heading>
-        <Text size="sm">{description}</Text>
+        <Heading size="sm" pb="1">
+          <Circle
+            size="4"
+            borderColor={props.isChecked ? 'blue.500' : 'gray.200'}
+            borderWidth={props.isChecked ? '5px' : '2px'}
+            display="inline-block"
+            mb="-2px"
+            mr="0.5"
+          />
+          &nbsp;
+          {title}
+        </Heading>
+        <Text fontSize="sm" lineHeight="shorter">
+          {description}
+        </Text>
       </Box>
     </Box>
   );

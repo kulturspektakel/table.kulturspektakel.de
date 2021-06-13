@@ -181,8 +181,8 @@ export default function Booking({startTime: s, partySize, areaId}: Props) {
                     hour: 'numeric',
                     minute: 'numeric',
                     timeZone: 'Europe/Berlin',
-                  })}{' '}
-                  Uhr
+                  })}
+                  &nbsp;Uhr
                 </Td>
               </Tr>
               <Tr>
@@ -289,8 +289,9 @@ export default function Booking({startTime: s, partySize, areaId}: Props) {
                       textTransform="uppercase"
                       letterSpacing="wider"
                       color="gray.600"
+                      textAlign="center"
                     >
-                      Sitzplatz
+                      Sitzplatz auswählen
                     </Heading>
                     <TableTypeSelector onChange={setPrefersIsland} />
                   </Td>
