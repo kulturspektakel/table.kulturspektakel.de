@@ -163,6 +163,17 @@ export default function Reservations() {
                 ihr euch nur an eurem Sitzplatz aufhalten und nicht an andere
                 Tische wechseln.
               </ListItem>
+              <ListItem>
+                Unser Hygienekonzept findet ihr auf{' '}
+                <ChakraLink
+                  color="red.500"
+                  fontWeight="semibold"
+                  isExternal
+                  href="https://kulturspektakel.de/hygiene/"
+                >
+                  kulturspektakel.de/hygiene
+                </ChakraLink>
+              </ListItem>
             </UnorderedList>
           </Box>
           <Box boxShadow="sm" bgColor="white" borderRadius="lg">

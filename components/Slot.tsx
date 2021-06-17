@@ -14,7 +14,6 @@ import {
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import {gql} from '@apollo/client';
-import {Props} from '../pages/book';
 
 export function SlotLink({
   startTime,
@@ -36,18 +35,8 @@ export function SlotLink({
     return children;
   }
 
-  const query: Props = {
-    startTime: startTime.getTime(),
-    partySize,
-    areaId: area.id,
-  };
   return (
-    <Link
-      href={{
-        pathname: '/book',
-        query,
-      }}
-    >
+    <Link href={`/book/${area.id}/${partySize}/${startTime.getTime()}`}>
       <Box w="100%">{children}</Box>
     </Link>
   );

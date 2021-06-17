@@ -10,6 +10,7 @@ import {
   Box,
   Input,
   VStack,
+  Text,
   Heading,
 } from '@chakra-ui/react';
 import {
@@ -21,18 +22,18 @@ import {
   isAfter,
   isBefore,
 } from 'date-fns';
-import {GetServerSideProps} from 'next';
+import {NextPageContext} from 'next';
 import {useRouter} from 'next/router';
-import React, {useEffect, useRef, useState} from 'react';
-import Page from '../components/Page';
-import {STEP_MINUTES} from '../components/Slots';
-import TableTypeSelector from '../components/TableTypeSelector';
-import useErrorDialog from '../components/useErrorDialog';
+import React, {useEffect, useState} from 'react';
+import Page from '../../../../components/Page';
+import {STEP_MINUTES} from '../../../../components/Slots';
+import TableTypeSelector from '../../../../components/TableTypeSelector';
+import useErrorDialog from '../../../../components/useErrorDialog';
 import {
   useRequestMutation,
   useAreaNameQuery,
   TableType,
-} from '../types/graphql';
+} from '../../../../types/graphql';
 
 const MIN_DURATION_MINUTES = 90;
 const MAX_DURATION_MINUTES = 240;
@@ -74,24 +75,22 @@ gql`
   }
 `;
 
-export type Props = {
+type Props = {
   startTime: number;
   partySize: number;
   areaId: string;
 };
 
-export default function Booking({startTime: s, partySize, areaId}: Props) {
-  const startTimeDate = useRef(new Date(s));
-
+function Booking({areaId, partySize, ...props}: Props) {
+  const startTime = new Date(props.startTime);
   const {data} = useAreaNameQuery({
     variables: {
       id: `Area:${areaId}`,
       partySize,
-      day: startTimeDate.current,
+      day: startTime,
     },
   });
 
-  const startTime = new Date(s);
   const earliestEnd = add(startTime, {minutes: MIN_DURATION_MINUTES});
   const availability =
     data?.node?.availability.filter(
@@ -110,22 +109,20 @@ export default function Booking({startTime: s, partySize, areaId}: Props) {
   const [otherPersons, setOtherPersons] = useState<string[]>(
     Array.from(Array(partySize - 1)).map(() => ''),
   );
-  const [
-    requestReservation,
-    {loading, error, data: requestData},
-  ] = useRequestMutation({
-    variables: {
-      areaId,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      endTime: endTime!,
-      otherPersons,
-      primaryEmail,
-      primaryPerson,
-      startTime,
-      tableType: prefersIsland ? TableType.Island : undefined,
-    },
-    errorPolicy: 'all',
-  });
+  const [requestReservation, {loading, error, data: requestData}] =
+    useRequestMutation({
+      variables: {
+        areaId,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        endTime: endTime!,
+        otherPersons,
+        primaryEmail,
+        primaryPerson,
+        startTime,
+        tableType: prefersIsland ? TableType.Island : undefined,
+      },
+      errorPolicy: 'all',
+    });
 
   const errorDialog = useErrorDialog(error);
   const router = useRouter();
@@ -269,7 +266,7 @@ export default function Booking({startTime: s, partySize, areaId}: Props) {
                       <Input
                         key={i}
                         autoComplete="off"
-                        placeholder={`Name Gast ${i + 1}`}
+                        placeholder="Name"
                         onChange={(e) => {
                           const newPersons = [...otherPersons];
                           newPersons[i] = e.target.value;
@@ -278,6 +275,17 @@ export default function Booking({startTime: s, partySize, areaId}: Props) {
                       />
                     ))}
                   </VStack>
+                  <Text
+                    mt="2"
+                    fontSize="md"
+                    fontWeight="normal"
+                    color="gray.500"
+                    textAlign="left"
+                    maxW="400px"
+                  >
+                    Kleinkinder die keinen eigenen Sitzplatz benötigen, müssen
+                    nicht eingetragen werden.
+                  </Text>
                 </Td>
               </Tr>
               {hasTableTypeChoice && (
@@ -326,26 +334,14 @@ function renderTime(date: Date): string {
   );
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async (
-  context,
-) => {
-  const {startTime, partySize, areaId} = context.query;
-  if (!startTime || !partySize || !areaId) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const props: any = undefined;
-    return {
-      redirect: {
-        destination: '/',
-      },
-      props,
-    };
-  }
+Booking.getInitialProps = ({query}: NextPageContext): Props => {
+  const {startTime, partySize, areaId} = query;
 
   return {
-    props: {
-      startTime: parseInt(String(startTime), 10),
-      partySize: parseInt(String(partySize), 10),
-      areaId: String(areaId),
-    },
+    startTime: parseInt(String(startTime), 10),
+    partySize: parseInt(String(partySize), 10),
+    areaId: String(areaId),
   };
 };
+
+export default Booking;

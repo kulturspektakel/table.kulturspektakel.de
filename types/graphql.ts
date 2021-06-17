@@ -64,6 +64,11 @@ export type Band = {
   description?: Maybe<Scalars['String']>;
 };
 
+export type Config = {
+  __typename?: 'Config';
+  reservationStart?: Maybe<Scalars['DateTime']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   cancelReservation?: Maybe<Scalars['Boolean']>;
@@ -192,6 +197,7 @@ export type Query = {
   node?: Maybe<Node>;
   productLists: Array<ProductList>;
   orders: Array<Order>;
+  config?: Maybe<Config>;
 };
 
 export type QueryReservationForTokenArgs = {
@@ -255,8 +261,7 @@ export type TableAvailability = {
 };
 
 export enum TableType {
-  BeerTable = 'BEER_TABLE',
-  BistroTable = 'BISTRO_TABLE',
+  Table = 'TABLE',
   Island = 'ISLAND',
 }
 
@@ -357,6 +362,12 @@ export type AreaNameQuery = {__typename?: 'Query'} & {
         >;
       }
   >;
+};
+
+export type ConfigQueryVariables = Exact<{[key: string]: never}>;
+
+export type ConfigQuery = {__typename?: 'Query'} & {
+  config?: Maybe<{__typename?: 'Config'} & Pick<Config, 'reservationStart'>>;
 };
 
 export type ReservationQueryVariables = Exact<{
@@ -703,6 +714,53 @@ export type AreaNameLazyQueryHookResult = ReturnType<
 export type AreaNameQueryResult = Apollo.QueryResult<
   AreaNameQuery,
   AreaNameQueryVariables
+>;
+export const ConfigDocument = gql`
+  query Config {
+    config {
+      reservationStart
+    }
+  }
+`;
+
+/**
+ * __useConfigQuery__
+ *
+ * To run a query within a React component, call `useConfigQuery` and pass it any options that fit your needs.
+ * When your component renders, `useConfigQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useConfigQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useConfigQuery(
+  baseOptions?: Apollo.QueryHookOptions<ConfigQuery, ConfigQueryVariables>,
+) {
+  const options = {...defaultOptions, ...baseOptions};
+  return Apollo.useQuery<ConfigQuery, ConfigQueryVariables>(
+    ConfigDocument,
+    options,
+  );
+}
+export function useConfigLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<ConfigQuery, ConfigQueryVariables>,
+) {
+  const options = {...defaultOptions, ...baseOptions};
+  return Apollo.useLazyQuery<ConfigQuery, ConfigQueryVariables>(
+    ConfigDocument,
+    options,
+  );
+}
+export type ConfigQueryHookResult = ReturnType<typeof useConfigQuery>;
+export type ConfigLazyQueryHookResult = ReturnType<typeof useConfigLazyQuery>;
+export type ConfigQueryResult = Apollo.QueryResult<
+  ConfigQuery,
+  ConfigQueryVariables
 >;
 export const ReservationDocument = gql`
   query Reservation($token: String!) {
