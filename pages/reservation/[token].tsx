@@ -74,14 +74,12 @@ const RESERVATION_STATUS: Record<ReservationStatus, string> = {
   [ReservationStatus.Confirmed]: 'Bestätigt',
   [ReservationStatus.Pending]: 'Unbestätigt',
   [ReservationStatus.CheckedIn]: 'Eingecheckt',
-  [ReservationStatus.Cleared]: 'abgesagt',
 };
 
 const RESERVATION_COLOR: Record<ReservationStatus, string> = {
   [ReservationStatus.Confirmed]: 'green',
   [ReservationStatus.Pending]: 'yellow',
   [ReservationStatus.CheckedIn]: 'green',
-  [ReservationStatus.Cleared]: 'red',
 };
 
 export default function Reservations() {

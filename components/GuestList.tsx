@@ -15,7 +15,7 @@ import useErrorDialog from './useErrorDialog';
 
 gql`
   mutation UpdateReservation($token: String!, $otherPersons: [String!]!) {
-    updateReservation(token: $token, otherPersons: $otherPersons) {
+    updateReservationOtherPersons(token: $token, otherPersons: $otherPersons) {
       id
       otherPersons
     }

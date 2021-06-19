@@ -27,9 +27,10 @@ export type Area = Node & {
   /** Unique identifier for the resource */
   id: Scalars['ID'];
   displayName: Scalars['String'];
+  themeColor: Scalars['String'];
   table: Array<Table>;
   openingHour: Array<OpeningHour>;
-  currentCapacity: Scalars['Int'];
+  availableTables: Scalars['Int'];
   availability: Array<TableAvailability>;
   bandsPlaying: Array<Band>;
 };
@@ -43,6 +44,10 @@ export type AreaTableArgs = {
 
 export type AreaOpeningHourArgs = {
   day?: Maybe<Scalars['Date']>;
+};
+
+export type AreaAvailableTablesArgs = {
+  time?: Maybe<Scalars['DateTime']>;
 };
 
 export type AreaAvailabilityArgs = {
@@ -71,12 +76,18 @@ export type Config = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  updateReservationOtherPersons?: Maybe<Reservation>;
   cancelReservation?: Maybe<Scalars['Boolean']>;
   confirmReservation?: Maybe<Reservation>;
   requestReservation: Scalars['Boolean'];
   updateReservation?: Maybe<Reservation>;
   checkInReservation?: Maybe<Reservation>;
   createOrder?: Maybe<Order>;
+};
+
+export type MutationUpdateReservationOtherPersonsArgs = {
+  token: Scalars['String'];
+  otherPersons: Array<Scalars['String']>;
 };
 
 export type MutationCancelReservationArgs = {
@@ -98,8 +109,12 @@ export type MutationRequestReservationArgs = {
 };
 
 export type MutationUpdateReservationArgs = {
-  token: Scalars['String'];
-  otherPersons: Array<Scalars['String']>;
+  id: Scalars['Int'];
+  startTime?: Maybe<Scalars['DateTime']>;
+  endTime?: Maybe<Scalars['DateTime']>;
+  tableId?: Maybe<Scalars['ID']>;
+  checkedInPersons?: Maybe<Scalars['Int']>;
+  note?: Maybe<Scalars['String']>;
 };
 
 export type MutationCheckInReservationArgs = {
@@ -198,6 +213,7 @@ export type Query = {
   productLists: Array<ProductList>;
   orders: Array<Order>;
   config?: Maybe<Config>;
+  availableCapacity: Scalars['Int'];
 };
 
 export type QueryReservationForTokenArgs = {
@@ -206,6 +222,10 @@ export type QueryReservationForTokenArgs = {
 
 export type QueryNodeArgs = {
   id: Scalars['ID'];
+};
+
+export type QueryAvailableCapacityArgs = {
+  time?: Maybe<Scalars['DateTime']>;
 };
 
 export type Reservation = {
@@ -219,6 +239,8 @@ export type Reservation = {
   primaryPerson: Scalars['String'];
   otherPersons: Array<Scalars['String']>;
   checkedInPersons: Scalars['Int'];
+  note?: Maybe<Scalars['String']>;
+  alternativeTables: Array<Maybe<Table>>;
   reservationsFromSamePerson: Array<Reservation>;
 };
 
@@ -226,7 +248,6 @@ export enum ReservationStatus {
   Pending = 'Pending',
   Confirmed = 'Confirmed',
   CheckedIn = 'CheckedIn',
-  Cleared = 'Cleared',
 }
 
 export enum SortOrder {
@@ -292,7 +313,7 @@ export type UpdateReservationMutationVariables = Exact<{
 }>;
 
 export type UpdateReservationMutation = {__typename?: 'Mutation'} & {
-  updateReservation?: Maybe<
+  updateReservationOtherPersons?: Maybe<
     {__typename?: 'Reservation'} & Pick<Reservation, 'id' | 'otherPersons'>
   >;
 };
@@ -472,7 +493,7 @@ export type CancelReservationMutationOptions = Apollo.BaseMutationOptions<
 >;
 export const UpdateReservationDocument = gql`
   mutation UpdateReservation($token: String!, $otherPersons: [String!]!) {
-    updateReservation(token: $token, otherPersons: $otherPersons) {
+    updateReservationOtherPersons(token: $token, otherPersons: $otherPersons) {
       id
       otherPersons
     }
