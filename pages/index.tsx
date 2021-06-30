@@ -41,10 +41,10 @@ export default function Home() {
       <VStack spacing="10">
         <VStack>
           <Text>
-            Um das Kult zu besuchen braucht ihr dieses Jahr einen festen
-            Sitzplatz. In Gruppen von bis zu zehn Personen könnt ihr euch in
-            unseren verschiedenen Bereichen Plätze reservieren. Ein spontaner
-            Besuch ist auch möglich sofern noch Plätze frei sind.
+            Um das Kult zu besuchen braucht ihr dieses Jahr eine
+            Platzreservierung für einen Sitzplatz. In Gruppen von bis zu zehn
+            Personen könnt ihr euch in unseren verschiedenen Bereichen Plätze
+            reservieren.
           </Text>
           <Text>
             Eure Reservierung ist nur für den ausgewählten Zeitraum und Bereich
