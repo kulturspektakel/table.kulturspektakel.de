@@ -146,7 +146,7 @@ function Booking({areaId, partySize, ...props}: Props) {
     availability.some(({tableType}) => tableType !== TableType.Island);
 
   const submitDisabled =
-    !endTime ||
+    (!endTime && steps > 1) ||
     !primaryPerson ||
     !primaryEmail ||
     otherPersons.some((p) => !p) ||
