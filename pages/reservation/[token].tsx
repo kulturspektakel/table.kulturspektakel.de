@@ -32,6 +32,7 @@ import Link from 'next/link';
 import CancelButton from '../../components/CancelButton';
 import GuestList from '../../components/GuestList';
 import {ChevronRightIcon, WarningTwoIcon} from '@chakra-ui/icons';
+import Head from 'next/head';
 
 gql`
   query Reservation($token: String!) {
@@ -120,9 +121,12 @@ export default function Reservations() {
       )}
       {reservation && (
         <VStack spacing="3" alignItems="stretch">
-          <Heading size="md" textAlign="center">
-            Reservierung #{reservation.id}
-          </Heading>
+          <Head>
+            <title>
+              Reservierung #{reservation.id} · Kulturspektakel Gauting
+            </title>
+          </Head>
+          <Heading size="md" textAlign="center"></Heading>
           <Box boxShadow="sm" bgColor="white" borderRadius="lg" p="5">
             <Heading size="sm" mb="1">
               Wichtige Informationen
