@@ -14,6 +14,7 @@ import {withScalars} from 'apollo-link-scalars';
 import introspectionResult from '../types/graphql.schema.json';
 import {buildClientSchema, IntrospectionQuery} from 'graphql';
 import {GraphQLDateTime, GraphQLDate} from 'graphql-scalars';
+import Head from 'next/head';
 
 const App = ({Component, pageProps}: AppProps) => {
   const client = useMemo(() => initializeApollo(), []);
@@ -30,6 +31,9 @@ const App = ({Component, pageProps}: AppProps) => {
 
   return (
     <ChakraProvider theme={theme}>
+      <Head>
+        <title>Tischreservierung · Kulturspektakel Gauting</title>
+      </Head>
       <ApolloProvider client={client}>
         <Component {...pageProps} />
       </ApolloProvider>
@@ -44,7 +48,7 @@ function initializeApollo() {
   }
   const scalarLink: ApolloLink = withScalars({
     schema: buildClientSchema(
-      (introspectionResult as unknown) as IntrospectionQuery,
+      introspectionResult as unknown as IntrospectionQuery,
     ),
     typesMap: {
       DateTime: GraphQLDateTime,
