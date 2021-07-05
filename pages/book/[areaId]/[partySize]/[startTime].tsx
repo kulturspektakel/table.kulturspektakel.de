@@ -93,16 +93,18 @@ function Booking({areaId, partySize, ...props}: Props) {
 
   const earliestEnd = add(startTime, {minutes: MIN_DURATION_MINUTES});
   const availability =
-    data?.node?.availability.filter(
-      ({startTime: s, endTime}) =>
-        !isAfter(s, startTime) && !isBefore(endTime, earliestEnd),
-    ) ?? [];
+    data?.node?.__typename === 'Area'
+      ? data.node.availability.filter(
+          ({startTime: s, endTime}) =>
+            !isAfter(s, startTime) && !isBefore(endTime, earliestEnd),
+        )
+      : [];
+
   const maxEndTime =
     availability.length > 0
       ? max(availability.map(({endTime}) => endTime))
       : startTime;
 
-  const [endTime, setEndTime] = useState<Date | null>(null);
   const [primaryPerson, setPrimaryPerson] = useState('');
   const [primaryEmail, setPrimaryEmail] = useState('');
   const [prefersIsland, setPrefersIsland] = useState<boolean | null>(null);
@@ -117,12 +119,22 @@ function Booking({areaId, partySize, ...props}: Props) {
       ) / STEP_MINUTES,
     ) + 1;
 
+  useEffect(() => {
+    if (steps < 2) {
+      setEndTime(maxEndTime);
+    }
+  }, [maxEndTime, steps]);
+
+  const [endTime, setEndTime] = useState<Date | null>(
+    steps < 2 ? maxEndTime : null,
+  );
+
   const [requestReservation, {loading, error, data: requestData}] =
     useRequestMutation({
       variables: {
         areaId,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        endTime: steps < 2 ? maxEndTime : endTime!,
+        endTime: endTime!,
         otherPersons,
         primaryEmail,
         primaryPerson,
@@ -146,7 +158,7 @@ function Booking({areaId, partySize, ...props}: Props) {
     availability.some(({tableType}) => tableType !== TableType.Island);
 
   const submitDisabled =
-    (!endTime && steps > 1) ||
+    !endTime ||
     !primaryPerson ||
     !primaryEmail ||
     otherPersons.some((p) => !p) ||
@@ -227,7 +239,11 @@ function Booking({areaId, partySize, ...props}: Props) {
                 <Th minH="64px" pr="0" isNumeric>
                   Bereich
                 </Th>
-                <Td fontWeight="semibold">{data?.node?.displayName ?? ''}</Td>
+                <Td fontWeight="semibold">
+                  {data?.node?.__typename === 'Area'
+                    ? data.node.displayName
+                    : ''}
+                </Td>
               </Tr>
               <Tr>
                 <Th pr="0" isNumeric>
