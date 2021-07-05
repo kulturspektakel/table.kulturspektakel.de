@@ -109,12 +109,20 @@ function Booking({areaId, partySize, ...props}: Props) {
   const [otherPersons, setOtherPersons] = useState<string[]>(
     Array.from(Array(partySize - 1)).map(() => ''),
   );
+  const steps =
+    Math.floor(
+      Math.min(
+        MAX_DURATION_MINUTES - MIN_DURATION_MINUTES,
+        differenceInMinutes(maxEndTime, earliestEnd),
+      ) / STEP_MINUTES,
+    ) + 1;
+
   const [requestReservation, {loading, error, data: requestData}] =
     useRequestMutation({
       variables: {
         areaId,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        endTime: endTime!,
+        endTime: steps < 2 ? maxEndTime : endTime!,
         otherPersons,
         primaryEmail,
         primaryPerson,
@@ -131,14 +139,6 @@ function Booking({areaId, partySize, ...props}: Props) {
       router.push('/confirm');
     }
   }, [requestData, router]);
-
-  const steps =
-    Math.floor(
-      Math.min(
-        MAX_DURATION_MINUTES - MIN_DURATION_MINUTES,
-        differenceInMinutes(maxEndTime, earliestEnd),
-      ) / STEP_MINUTES,
-    ) + 1;
 
   const hasTableTypeChoice =
     areaId === 'gb' &&
