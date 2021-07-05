@@ -35,6 +35,13 @@ export type Area = Node & {
   bandsPlaying: Array<Band>;
 };
 
+export type AreaTableArgs = {
+  first?: Maybe<Scalars['Int']>;
+  last?: Maybe<Scalars['Int']>;
+  before?: Maybe<TableWhereUniqueInput>;
+  after?: Maybe<TableWhereUniqueInput>;
+};
+
 export type AreaOpeningHourArgs = {
   day?: Maybe<Scalars['Date']>;
 };
@@ -76,7 +83,6 @@ export type Mutation = {
   updateReservation?: Maybe<Reservation>;
   checkInReservation?: Maybe<Reservation>;
   createOrder?: Maybe<Order>;
-  createReservation?: Maybe<Reservation>;
 };
 
 export type MutationUpdateReservationOtherPersonsArgs = {
@@ -120,16 +126,6 @@ export type MutationCreateOrderArgs = {
   tableId: Scalars['ID'];
   products: Array<OrderItemInput>;
   payment: OrderPayment;
-};
-
-export type MutationCreateReservationArgs = {
-  tableId: Scalars['ID'];
-  primaryEmail: Scalars['String'];
-  primaryPerson: Scalars['String'];
-  otherPersons: Array<Scalars['String']>;
-  startTime: Scalars['DateTime'];
-  endTime: Scalars['DateTime'];
-  note?: Maybe<Scalars['String']>;
 };
 
 export type Node = {
@@ -244,9 +240,7 @@ export type Reservation = {
   otherPersons: Array<Scalars['String']>;
   checkedInPersons: Scalars['Int'];
   note?: Maybe<Scalars['String']>;
-  checkInTime?: Maybe<Scalars['DateTime']>;
   alternativeTables: Array<Maybe<Table>>;
-  availableToCheckIn: Scalars['Int'];
   reservationsFromSamePerson: Array<Reservation>;
 };
 
@@ -261,10 +255,9 @@ export enum SortOrder {
   Desc = 'desc',
 }
 
-export type Table = Node & {
+export type Table = {
   __typename?: 'Table';
-  /** Unique identifier for the resource */
-  id: Scalars['ID'];
+  id: Scalars['String'];
   displayName: Scalars['String'];
   maxCapacity: Scalars['Int'];
   type: TableType;
@@ -274,6 +267,11 @@ export type Table = Node & {
 
 export type TableReservationsArgs = {
   day?: Maybe<Scalars['Date']>;
+};
+
+export type TableAreaIdDisplayNameCompoundUniqueInput = {
+  areaId: Scalars['String'];
+  displayName: Scalars['String'];
 };
 
 export type TableAvailability = {
@@ -287,6 +285,11 @@ export enum TableType {
   Table = 'TABLE',
   Island = 'ISLAND',
 }
+
+export type TableWhereUniqueInput = {
+  id?: Maybe<Scalars['String']>;
+  areaId_displayName?: Maybe<TableAreaIdDisplayNameCompoundUniqueInput>;
+};
 
 export type Viewer = {
   __typename?: 'Viewer';
@@ -371,15 +374,14 @@ export type AreaNameQueryVariables = Exact<{
 
 export type AreaNameQuery = {__typename?: 'Query'} & {
   node?: Maybe<
-    | ({__typename?: 'Area'} & Pick<Area, 'displayName'> & {
-          availability: Array<
-            {__typename?: 'TableAvailability'} & Pick<
-              TableAvailability,
-              'startTime' | 'endTime' | 'tableType'
-            >
-          >;
-        })
-    | {__typename?: 'Table'}
+    {__typename?: 'Area'} & Pick<Area, 'displayName'> & {
+        availability: Array<
+          {__typename?: 'TableAvailability'} & Pick<
+            TableAvailability,
+            'startTime' | 'endTime' | 'tableType'
+          >
+        >;
+      }
   >;
 };
 
