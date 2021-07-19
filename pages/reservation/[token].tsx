@@ -149,16 +149,9 @@ export default function Reservations() {
                 verfällt sie.
               </ListItem>
               <ListItem>
-                Zur Kontaktverfolgung bitten wir euch die{' '}
-                <ChakraLink
-                  href="https://www.coronawarn.app/"
-                  color="red.500"
-                  fontWeight="semibold"
-                  isExternal
-                >
-                  Corona-Warn-App
-                </ChakraLink>{' '}
-                zu installieren.
+                Am Einlass werden die Kontaktdaten aller Gäste erfasst -
+                entweder via Check-In bei darfichrein.de mit eurem Smartphone
+                oder über ein Formular zur Gästeregistrierung
               </ListItem>
               <ListItem>
                 Außer auf den Wegen zu den Verkaufsständen und Toiletten dürft

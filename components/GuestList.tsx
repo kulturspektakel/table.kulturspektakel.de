@@ -8,6 +8,8 @@ import {
   InputRightElement,
   VStack,
   Text,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 import React, {useCallback, useEffect, useState} from 'react';
 import {useUpdateReservationMutation} from '../types/graphql';
@@ -114,20 +116,27 @@ export default function useGuestListMutation({
         </Button>
       )}
       {canEdit && (
-        <Text
-          visibility={
-            maxCapacity > otherPersons.length + 1 ? 'visible' : 'hidden'
-          }
-          fontWeight="normal"
-          fontSize="sm"
-          mt="3"
-          color="gray.600"
-          maxW="500px"
-        >
-          Am Platz, den wir für dich reserviert haben, können bis zu{' '}
-          {maxCapacity}
-          &nbsp;Personen sitzen. Du kannst noch weitere Gäste eintragen.
-        </Text>
+        <>
+          <Alert status="warning" mt="2" borderRadius="md">
+            <AlertIcon />
+            Für eine mögliche Kontaktverfolgung der Gesundheitsämter müssen die
+            vollständigen Namen aller Gäste angegeben werden.
+          </Alert>
+          <Text
+            visibility={
+              maxCapacity > otherPersons.length + 1 ? 'visible' : 'hidden'
+            }
+            fontWeight="normal"
+            fontSize="sm"
+            mt="3"
+            color="gray.600"
+            maxW="500px"
+          >
+            Am Platz, den wir für dich reserviert haben, können bis zu{' '}
+            {maxCapacity}
+            &nbsp;Personen sitzen. Du kannst noch weitere Gäste eintragen.
+          </Text>
+        </>
       )}
     </form>
   );

@@ -35,13 +35,6 @@ export type Area = Node & {
   bandsPlaying: Array<Band>;
 };
 
-export type AreaTableArgs = {
-  first?: Maybe<Scalars['Int']>;
-  last?: Maybe<Scalars['Int']>;
-  before?: Maybe<TableWhereUniqueInput>;
-  after?: Maybe<TableWhereUniqueInput>;
-};
-
 export type AreaOpeningHourArgs = {
   day?: Maybe<Scalars['Date']>;
 };
@@ -71,7 +64,8 @@ export type Band = {
 
 export type Config = {
   __typename?: 'Config';
-  reservationStart?: Maybe<Scalars['DateTime']>;
+  reservationStart: Scalars['DateTime'];
+  tokenValue: Scalars['Int'];
 };
 
 export type Mutation = {
@@ -83,6 +77,9 @@ export type Mutation = {
   updateReservation?: Maybe<Reservation>;
   checkInReservation?: Maybe<Reservation>;
   createOrder?: Maybe<Order>;
+  createReservation?: Maybe<Reservation>;
+  upsertProductList?: Maybe<ProductList>;
+  deleteProductList?: Maybe<Scalars['Boolean']>;
 };
 
 export type MutationUpdateReservationOtherPersonsArgs = {
@@ -115,6 +112,7 @@ export type MutationUpdateReservationArgs = {
   tableId?: Maybe<Scalars['ID']>;
   checkedInPersons?: Maybe<Scalars['Int']>;
   note?: Maybe<Scalars['String']>;
+  primaryPerson?: Maybe<Scalars['String']>;
 };
 
 export type MutationCheckInReservationArgs = {
@@ -123,9 +121,32 @@ export type MutationCheckInReservationArgs = {
 };
 
 export type MutationCreateOrderArgs = {
-  tableId: Scalars['ID'];
   products: Array<OrderItemInput>;
   payment: OrderPayment;
+  clientId?: Maybe<Scalars['String']>;
+  deposit: Scalars['Int'];
+  deviceTime: Scalars['DateTime'];
+};
+
+export type MutationCreateReservationArgs = {
+  tableId: Scalars['ID'];
+  primaryEmail: Scalars['String'];
+  primaryPerson: Scalars['String'];
+  otherPersons: Array<Scalars['String']>;
+  startTime: Scalars['DateTime'];
+  endTime: Scalars['DateTime'];
+  note?: Maybe<Scalars['String']>;
+};
+
+export type MutationUpsertProductListArgs = {
+  id?: Maybe<Scalars['Int']>;
+  name?: Maybe<Scalars['String']>;
+  emoji?: Maybe<Scalars['String']>;
+  products?: Maybe<Array<ProductInput>>;
+};
+
+export type MutationDeleteProductListArgs = {
+  id: Scalars['Int'];
 };
 
 export type Node = {
@@ -145,7 +166,8 @@ export type Order = {
   payment: OrderPayment;
   tokens: Scalars['Int'];
   createdAt: Scalars['DateTime'];
-  table?: Maybe<Table>;
+  deviceTime: Scalars['DateTime'];
+  deviceId: Scalars['String'];
   items: Array<OrderItem>;
   total?: Maybe<Scalars['Int']>;
 };
@@ -156,11 +178,15 @@ export type OrderItem = {
   note?: Maybe<Scalars['String']>;
   amount: Scalars['Int'];
   name: Scalars['String'];
+  list?: Maybe<ProductList>;
+  perUnitPrice: Scalars['Int'];
 };
 
 export type OrderItemInput = {
-  productId: Scalars['Int'];
+  perUnitPrice: Scalars['Int'];
+  name: Scalars['String'];
   amount: Scalars['Int'];
+  listId?: Maybe<Scalars['Int']>;
   note?: Maybe<Scalars['String']>;
 };
 
@@ -178,6 +204,13 @@ export type Product = {
   id: Scalars['Int'];
   name: Scalars['String'];
   price: Scalars['Int'];
+  requiresDeposit: Scalars['Boolean'];
+};
+
+export type ProductInput = {
+  name: Scalars['String'];
+  price: Scalars['Int'];
+  requiresDeposit?: Maybe<Scalars['Boolean']>;
 };
 
 export type ProductList = {
@@ -214,6 +247,8 @@ export type Query = {
   orders: Array<Order>;
   config?: Maybe<Config>;
   availableCapacity: Scalars['Int'];
+  reservationsByPerson: Array<ReservationByPerson>;
+  orderItems: Array<OrderItem>;
 };
 
 export type QueryReservationForTokenArgs = {
@@ -228,6 +263,12 @@ export type QueryAvailableCapacityArgs = {
   time?: Maybe<Scalars['DateTime']>;
 };
 
+export type QueryOrderItemsArgs = {
+  from?: Maybe<Scalars['DateTime']>;
+  until?: Maybe<Scalars['DateTime']>;
+  productListId?: Maybe<Scalars['Int']>;
+};
+
 export type Reservation = {
   __typename?: 'Reservation';
   id: Scalars['Int'];
@@ -237,11 +278,20 @@ export type Reservation = {
   startTime: Scalars['DateTime'];
   endTime: Scalars['DateTime'];
   primaryPerson: Scalars['String'];
+  primaryEmail: Scalars['String'];
   otherPersons: Array<Scalars['String']>;
   checkedInPersons: Scalars['Int'];
   note?: Maybe<Scalars['String']>;
+  checkInTime?: Maybe<Scalars['DateTime']>;
   alternativeTables: Array<Maybe<Table>>;
+  availableToCheckIn: Scalars['Int'];
   reservationsFromSamePerson: Array<Reservation>;
+};
+
+export type ReservationByPerson = {
+  __typename?: 'ReservationByPerson';
+  email: Scalars['String'];
+  reservations: Array<Reservation>;
 };
 
 export enum ReservationStatus {
@@ -255,9 +305,10 @@ export enum SortOrder {
   Desc = 'desc',
 }
 
-export type Table = {
+export type Table = Node & {
   __typename?: 'Table';
-  id: Scalars['String'];
+  /** Unique identifier for the resource */
+  id: Scalars['ID'];
   displayName: Scalars['String'];
   maxCapacity: Scalars['Int'];
   type: TableType;
@@ -267,11 +318,6 @@ export type Table = {
 
 export type TableReservationsArgs = {
   day?: Maybe<Scalars['Date']>;
-};
-
-export type TableAreaIdDisplayNameCompoundUniqueInput = {
-  areaId: Scalars['String'];
-  displayName: Scalars['String'];
 };
 
 export type TableAvailability = {
@@ -285,11 +331,6 @@ export enum TableType {
   Table = 'TABLE',
   Island = 'ISLAND',
 }
-
-export type TableWhereUniqueInput = {
-  id?: Maybe<Scalars['String']>;
-  areaId_displayName?: Maybe<TableAreaIdDisplayNameCompoundUniqueInput>;
-};
 
 export type Viewer = {
   __typename?: 'Viewer';
@@ -374,14 +415,15 @@ export type AreaNameQueryVariables = Exact<{
 
 export type AreaNameQuery = {__typename?: 'Query'} & {
   node?: Maybe<
-    {__typename?: 'Area'} & Pick<Area, 'displayName'> & {
-        availability: Array<
-          {__typename?: 'TableAvailability'} & Pick<
-            TableAvailability,
-            'startTime' | 'endTime' | 'tableType'
-          >
-        >;
-      }
+    | ({__typename?: 'Area'} & Pick<Area, 'displayName'> & {
+          availability: Array<
+            {__typename?: 'TableAvailability'} & Pick<
+              TableAvailability,
+              'startTime' | 'endTime' | 'tableType'
+            >
+          >;
+        })
+    | {__typename?: 'Table'}
   >;
 };
 
